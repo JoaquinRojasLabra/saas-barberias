@@ -1,6 +1,10 @@
 export const formatCLP = (n) => new Intl.NumberFormat("es-CL", { style: "currency", currency: "CLP", maximumFractionDigits: 0 }).format(n)
 
-export const formatHora = (iso) => new Date(iso).toLocaleTimeString("es-CL", { hour: "2-digit", minute: "2-digit" })
+export const formatHora = (iso) => {
+  const d = new Date(iso)
+  if (isNaN(d.getTime())) return "--"
+  return d.toLocaleTimeString("es-CL", { hour: "2-digit", minute: "2-digit" })
+}
 
 export const hoyKey = (d = new Date()) => {
   const y = d.getFullYear()
