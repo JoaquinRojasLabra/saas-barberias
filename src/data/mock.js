@@ -3,6 +3,7 @@ export const negocio = {
   nombre: "Barbería El Cauce",
   direccion: "San Antonio 412, Santiago",
   telefono: "+56955551111",
+  qrUrl: "https://wa.me/56955551111",
   tema: "elegante",
 }
 
@@ -33,9 +34,10 @@ export const ventasMock = [
 ]
 
 export const qrStatsMock = [
-  { id: "q1", fechaHora: "2026-08-04T09:15:00", fuente: "QR mostrador" },
-  { id: "q2", fechaHora: "2026-08-04T10:02:00", fuente: "QR mostrador" },
-  { id: "q3", fechaHora: "2026-08-04T13:45:00", fuente: "QR lavabo" },
+  { id: "q1", fechaHora: "2026-08-04T09:15:00", fuente: "QR mostrador", monto: 12000 },
+  { id: "q2", fechaHora: "2026-08-04T10:02:00", fuente: "QR mostrador", monto: 18000 },
+  { id: "q3", fechaHora: "2026-08-04T13:45:00", fuente: "QR lavabo", monto: 8000 },
+  { id: "q4", fechaHora: "2026-08-04T15:30:00", fuente: "QR mostrador", monto: 25000 },
 ]
 
 export const empleados = [
