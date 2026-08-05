@@ -5,6 +5,7 @@ import Dashboard from "@/components/dashboard/Dashboard"
 import Agenda from "@/components/agenda/Agenda"
 import Ventas from "@/components/ventas/Ventas"
 import Clientes from "@/components/clientes/Clientes"
+import QR from "@/components/qr/QR"
 
 function Shell() {
   const { view } = useStore()
@@ -19,7 +20,7 @@ function Shell() {
           {view === "agenda" && <Agenda />}
           {view === "clientes" && <Clientes />}
           {view === "ventas" && <Ventas />}
-          {view === "qr" && <p className="text-sm text-[var(--fg-muted)]">QR (provisional)</p>}
+          {view === "qr" && <QR />}
         </main>
       </div>
     </div>
