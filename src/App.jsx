@@ -4,6 +4,7 @@ import Topbar from "@/components/Topbar"
 import Dashboard from "@/components/dashboard/Dashboard"
 import Agenda from "@/components/agenda/Agenda"
 import Ventas from "@/components/ventas/Ventas"
+import Clientes from "@/components/clientes/Clientes"
 
 function Shell() {
   const { view } = useStore()
@@ -16,7 +17,7 @@ function Shell() {
         <main className="flex-1 p-6">
           {view === "dashboard" && <Dashboard />}
           {view === "agenda" && <Agenda />}
-          {view === "clientes" && <p className="text-sm text-[var(--fg-muted)]">Clientes (provisional)</p>}
+          {view === "clientes" && <Clientes />}
           {view === "ventas" && <Ventas />}
           {view === "qr" && <p className="text-sm text-[var(--fg-muted)]">QR (provisional)</p>}
         </main>
