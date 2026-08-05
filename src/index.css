@@ -1,0 +1,33 @@
+@import "tailwindcss";
+
+:root {
+  --bg: #f8f9fa;
+  --bg-card: #ffffff;
+  --fg: #111827;
+  --fg-muted: #6b7280;
+  --accent: #0e7490;
+  --accent-2: #14532d;
+  --ring-track: #e5e7eb;
+  --border: #e5e7eb;
+  --shadow: 0 1px 3px rgba(0,0,0,.06);
+}
+
+.theme-fintech {
+  --bg: #0f172a;
+  --bg-card: #1e293b;
+  --fg: #f8fafc;
+  --fg-muted: #94a3b8;
+  --accent: #4f46e5;
+  --accent-2: #a855f7;
+  --ring-track: #334155;
+  --border: #334155;
+  --shadow: 0 4px 20px rgba(0,0,0,.4);
+}
+
+body {
+  margin: 0;
+  font-family: "Inter", system-ui, -apple-system, sans-serif;
+  background-color: var(--bg);
+  color: var(--fg);
+  transition: background-color .4s ease, color .4s ease;
+}
