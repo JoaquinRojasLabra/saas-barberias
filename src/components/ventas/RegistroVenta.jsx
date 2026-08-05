@@ -66,7 +66,7 @@ export default function RegistroVenta({ onClose, onSave }) {
             </select>
           </label>
           <p className="text-xs font-semibold text-[var(--fg-muted)]">Total: {formatCLP(servicio?.precio || 0)}</p>
-          <button type="submit" disabled={!clienteId || !servicioId} className="w-full mt-2 bg-[var(--accent)] text-white font-semibold py-2.5 rounded-xl disabled:opacity-40 disabled:cursor-not-allowed">Registrar venta</button>
+          <button type="submit" disabled={!clienteId || !servicioId || !servicio?.precio} className="w-full mt-2 bg-[var(--accent)] text-white font-semibold py-2.5 rounded-xl disabled:opacity-40 disabled:cursor-not-allowed">Registrar venta</button>
         </form>
       </motion.div>
     </motion.div>

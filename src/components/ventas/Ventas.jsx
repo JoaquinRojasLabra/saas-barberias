@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useState, useRef, useEffect } from "react"
 import { Plus, CheckCircle } from "@phosphor-icons/react"
 import { useStore } from "@/context/store"
 import { hoyKey, formatCLP, formatHora } from "@/lib/format"
@@ -8,19 +8,23 @@ export default function Ventas() {
   const { ventas, clientes, servicios } = useStore()
   const [showModal, setShowModal] = useState(false)
   const [savedFlash, setSavedFlash] = useState(false)
+  const timerRef = useRef(null)
 
   const getCliente = (id) => clientes.find((c) => c.id === id)
   const getServicio = (id) => servicios.find((s) => s.id === id)
 
-  const ordenadas = [...ventas].sort((a, b) => (a.fechaHora > b.fechaHora ? -1 : 1))
+  const ordenadas = [...ventas].sort((a, b) => (a.fechaHora < b.fechaHora ? 1 : a.fechaHora > b.fechaHora ? -1 : 0))
 
   const flash = () => {
     setSavedFlash(true)
-    setTimeout(() => setSavedFlash(false), 2000)
+    if (timerRef.current) clearTimeout(timerRef.current)
+    timerRef.current = setTimeout(() => setSavedFlash(false), 2000)
   }
 
+  useEffect(() => () => { if (timerRef.current) clearTimeout(timerRef.current) }, [])
+
   const totalHoy = ventas
-    .filter((v) => v.fechaHora.startsWith(hoyKey()))
+    .filter((v) => v.fechaHora.slice(0, 10) === hoyKey())
     .reduce((sum, v) => sum + v.monto, 0)
 
   return (
