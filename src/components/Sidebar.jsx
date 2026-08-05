@@ -12,7 +12,7 @@ const items = [
 ]
 
 export default function Sidebar() {
-  const { view, setView, negocio } = useStore()
+  const { view, setView, negocio, empleados } = useStore()
 
   return (
     <aside className="w-60 shrink-0 h-screen sticky top-0 flex flex-col gap-6 px-4 py-6 bg-[var(--bg-card)] border-r border-[var(--border)]">
@@ -37,8 +37,8 @@ export default function Sidebar() {
         })}
       </nav>
       <motion.div className="mt-auto px-3 py-3 rounded-xl bg-black/5 text-xs text-[var(--fg-muted)]">
-        <p className="font-semibold text-[var(--fg)]">Mauricio</p>
-        <p>Dueño · Barbería El Cauce</p>
+        <p className="font-semibold text-[var(--fg)]">{empleados[0]?.nombre || "Dueño"}</p>
+        <p>Dueño · {negocio.nombre}</p>
       </motion.div>
     </aside>
   )

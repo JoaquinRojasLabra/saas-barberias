@@ -16,13 +16,13 @@ export function StoreProvider({ children }) {
     return v
   }
 
-  const addTurno = (turno) => setTurnos((prev) => [...prev, { id: `t${Date.now()}`, ...turno }])
+  const addTurno = (turno) => setTurnos((prev) => [{ id: `t${Date.now()}`, ...turno }, ...prev])
 
   const setTurnoEstado = (id, estado) =>
     setTurnos((prev) => prev.map((t) => (t.id === id ? { ...t, estado } : t)))
 
   const addQrScan = (fuente) =>
-    setQrStats((prev) => [...prev, { id: `q${Date.now()}`, fechaHora: new Date().toISOString(), fuente }])
+    setQrStats((prev) => [{ id: `q${Date.now()}`, fechaHora: new Date().toISOString(), fuente }, ...prev])
 
   const value = {
     negocio, servicios, empleados,
@@ -34,4 +34,8 @@ export function StoreProvider({ children }) {
   return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>
 }
 
-export const useStore = () => useContext(StoreContext)
+export function useStore() {
+  const ctx = useContext(StoreContext)
+  if (!ctx) throw new Error("useStore must be used within a StoreProvider")
+  return ctx
+}
