@@ -2,6 +2,7 @@ import { StoreProvider, useStore } from "@/context/store"
 import Sidebar from "@/components/Sidebar"
 import Topbar from "@/components/Topbar"
 import Dashboard from "@/components/dashboard/Dashboard"
+import Agenda from "@/components/agenda/Agenda"
 
 function Shell() {
   const { view } = useStore()
@@ -13,7 +14,7 @@ function Shell() {
         <Topbar />
         <main className="flex-1 p-6">
           {view === "dashboard" && <Dashboard />}
-          {view === "agenda" && <p className="text-sm text-[var(--fg-muted)]">Agenda (provisional)</p>}
+          {view === "agenda" && <Agenda />}
           {view === "clientes" && <p className="text-sm text-[var(--fg-muted)]">Clientes (provisional)</p>}
           {view === "ventas" && <p className="text-sm text-[var(--fg-muted)]">Ventas (provisional)</p>}
           {view === "qr" && <p className="text-sm text-[var(--fg-muted)]">QR (provisional)</p>}
