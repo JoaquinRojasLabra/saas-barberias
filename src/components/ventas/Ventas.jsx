@@ -1,0 +1,63 @@
+import { useState } from "react"
+import { Plus, CheckCircle } from "@phosphor-icons/react"
+import { useStore } from "@/context/store"
+import { hoyKey, formatCLP, formatHora } from "@/lib/format"
+import RegistroVenta from "./RegistroVenta"
+
+export default function Ventas() {
+  const { ventas, clientes, servicios } = useStore()
+  const [showModal, setShowModal] = useState(false)
+  const [savedFlash, setSavedFlash] = useState(false)
+
+  const getCliente = (id) => clientes.find((c) => c.id === id)
+  const getServicio = (id) => servicios.find((s) => s.id === id)
+
+  const ordenadas = [...ventas].sort((a, b) => (a.fechaHora > b.fechaHora ? -1 : 1))
+
+  const flash = () => {
+    setSavedFlash(true)
+    setTimeout(() => setSavedFlash(false), 2000)
+  }
+
+  const totalHoy = ventas
+    .filter((v) => v.fechaHora.startsWith(hoyKey()))
+    .reduce((sum, v) => sum + v.monto, 0)
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <h1 className="text-xl font-extrabold tracking-tight">Ventas</h1>
+        <button onClick={() => setShowModal(true)} className="flex items-center gap-2 bg-[var(--accent)] text-white text-sm font-semibold px-4 py-2 rounded-xl">
+          <Plus size={18} weight="bold" /> Registrar venta
+        </button>
+      </div>
+
+      <div className="flex items-center gap-3">
+        <div className="flex-1 bg-[var(--bg-card)] border border-[var(--border)] rounded-2xl px-4 py-3">
+          <p className="text-xs text-[var(--fg-muted)]">Total hoy</p>
+          <p className="text-2xl font-extrabold tracking-tight">{formatCLP(totalHoy)}</p>
+        </div>
+        {savedFlash && (
+          <div className="flex items-center gap-2 bg-green-500/10 border border-green-500/40 text-green-700 text-sm font-semibold px-4 py-3 rounded-2xl">
+            <CheckCircle size={18} weight="bold" /> Venta registrada
+          </div>
+        )}
+      </div>
+
+      <div className="space-y-2">
+        {ordenadas.map((v) => (
+          <div key={v.id} className="flex items-center justify-between gap-3 border border-[var(--border)] rounded-xl px-4 py-3 bg-[var(--bg-card)]">
+            <div>
+              <p className="text-sm font-semibold">{getCliente(v.clienteId)?.nombre || "Cliente"}</p>
+              <p className="text-xs text-[var(--fg-muted)]">{getServicio(v.servicioId)?.nombre || "Servicio"} · {formatHora(v.fechaHora)}</p>
+            </div>
+            <p className="text-sm font-extrabold">{formatCLP(v.monto)}</p>
+          </div>
+        ))}
+        {ordenadas.length === 0 && <p className="text-sm text-[var(--fg-muted)]">No hay ventas registradas.</p>}
+      </div>
+
+      {showModal && <RegistroVenta onClose={() => setShowModal(false)} onSave={flash} />}
+    </div>
+  )
+}
