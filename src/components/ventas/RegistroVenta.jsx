@@ -40,7 +40,7 @@ export default function RegistroVenta({ onClose, onSave }) {
       <motion.div ref={ref} tabIndex={-1} role="dialog" aria-modal="true" aria-labelledby="venta-modal-title" initial={{ scale: 0.95, y: 10 }} animate={{ scale: 1, y: 0 }} onClick={(e) => e.stopPropagation()} className="w-full max-w-md bg-[var(--bg-card)] border border-[var(--border)] rounded-2xl p-6 shadow-2xl outline-none">
         <div className="flex items-center justify-between mb-4">
           <h2 id="venta-modal-title" className="text-lg font-bold">Registrar venta</h2>
-          <button onClick={onClose} className="text-[var(--fg-muted)] hover:text-[var(--fg)]"><X size={20} /></button>
+          <button onClick={onClose} aria-label="Cerrar" className="text-[var(--fg-muted)] hover:text-[var(--fg)]"><X size={20} /></button>
         </div>
         <form onSubmit={submit} className="space-y-3">
           <label className="block">

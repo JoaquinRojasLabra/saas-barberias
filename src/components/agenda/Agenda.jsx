@@ -11,7 +11,7 @@ export default function Agenda() {
   const getCliente = (id) => clientes.find((c) => c.id === id)
   const getServicio = (id) => servicios.find((s) => s.id === id)
 
-  const ordenados = [...turnos].sort((a, b) => (a.hora > b.hora ? 1 : -1))
+  const ordenados = [...turnos].sort((a, b) => (a.hora < b.hora ? -1 : a.hora > b.hora ? 1 : 0))
 
   return (
     <div className="space-y-4">

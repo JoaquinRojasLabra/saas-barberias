@@ -8,7 +8,7 @@ export default function Clientes() {
   const { clientes, ventas, turnos } = useStore()
   const [ficha, setFicha] = useState(null)
 
-  const ordenados = [...clientes].sort((a, b) => (a.nombre < b.nombre ? -1 : a.nombre > b.nombre ? 1 : 0))
+  const ordenados = [...clientes].sort((a, b) => a.nombre.localeCompare(b.nombre, "es"))
 
   return (
     <div className="space-y-4">

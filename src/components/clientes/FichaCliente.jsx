@@ -36,10 +36,9 @@ export default function FichaCliente({ cliente, onClose }) {
             <div className="min-w-0">
               <h2 id="ficha-cliente-title" className="text-lg font-bold truncate">{cliente.nombre}</h2>
               <p className="text-xs text-[var(--fg-muted)] flex items-center gap-1"><User size={12} /> {cliente.telefono}</p>
-              {cliente.ultimaVisita && <p className="text-xs text-[var(--fg-muted)]">Última visita: {cliente.ultimaVisita}</p>}
             </div>
           </div>
-          <button onClick={onClose} className="text-[var(--fg-muted)] hover:text-[var(--fg)] shrink-0"><X size={20} /></button>
+          <button onClick={onClose} aria-label="Cerrar" className="text-[var(--fg-muted)] hover:text-[var(--fg)] shrink-0"><X size={20} /></button>
         </div>
         <div className="overflow-y-auto p-6 space-y-4">
           <div className="grid grid-cols-3 gap-3 text-center">
