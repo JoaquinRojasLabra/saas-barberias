@@ -21,6 +21,10 @@ export function StoreProvider({ children }) {
   const [clientes, setClientes] = useState(() => load("clientes", clientesMock))
   const [ventas, setVentas] = useState(() => load("ventas", ventasMock))
   const [qrStats, setQrStats] = useState(() => load("qrStats", qrStatsMock))
+  const [preferencias, setPreferencias] = useState(() => load("preferencias", {
+    horasRecordatorio: 2,
+    whatsappNumero: negocioMock.telefono,
+  }))
   const [view, setView] = useState("dashboard")
 
   const persist = (key, value) => {
@@ -37,8 +41,11 @@ export function StoreProvider({ children }) {
   useEffect(() => persist("clientes", clientes), [clientes])
   useEffect(() => persist("ventas", ventas), [ventas])
   useEffect(() => persist("qrStats", qrStats), [qrStats])
+  useEffect(() => persist("preferencias", preferencias), [preferencias])
 
   const updateNegocio = (patch) => setNegocio((prev) => ({ ...prev, ...patch }))
+
+  const updatePreferencias = (patch) => setPreferencias((prev) => ({ ...prev, ...patch }))
 
   const addVenta = (venta) => {
     const v = { id: `v${Date.now()}`, ...venta }
@@ -88,9 +95,9 @@ export function StoreProvider({ children }) {
 
   const value = {
     negocio, servicios, empleados, slotsHorario,
-    turnos, clientes, ventas, qrStats,
+    turnos, clientes, ventas, qrStats, preferencias,
     view, setView,
-    updateNegocio, addVenta, addTurno, setTurnoEstado, addQrScan,
+    updateNegocio, updatePreferencias, addVenta, addTurno, setTurnoEstado, addQrScan,
     tomarCita, generarLinkPago,
     addCliente, updateCliente, addServicio, updateServicio, removeServicio,
   }

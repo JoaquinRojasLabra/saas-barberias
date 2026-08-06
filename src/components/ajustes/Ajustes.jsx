@@ -1,12 +1,12 @@
 import { useState } from "react"
-import { Plus, Trash, PencilSimple, Check, X, Storefront, Palette, Scissors, Clock, Key } from "@phosphor-icons/react"
+import { Plus, Trash, PencilSimple, Check, X, Storefront, Palette, Scissors, Clock, Key, ChatTeardrop, ArrowSquareOut } from "@phosphor-icons/react"
 import { useStore } from "@/context/store"
 import { useTheme } from "@/lib/theme"
 import { useToast } from "@/lib/toast"
 import { useAuth } from "@/lib/auth"
 
 export default function Ajustes() {
-  const { negocio, servicios, updateNegocio, addServicio, updateServicio, removeServicio } = useStore()
+  const { negocio, servicios, updateNegocio, updatePreferencias, preferencias, addServicio, updateServicio, removeServicio } = useStore()
   const { theme, setTheme, THEMES } = useTheme()
   const push = useToast()
   const { updateCredentials } = useAuth()
@@ -16,6 +16,11 @@ export default function Ajustes() {
     direccion: negocio.direccion,
     telefono: negocio.telefono,
     qrUrl: negocio.qrUrl,
+  })
+
+  const [notif, setNotif] = useState({
+    horasRecordatorio: preferencias?.horasRecordatorio ?? 2,
+    whatsappNumero: preferencias?.whatsappNumero ?? negocio.telefono,
   })
 
   const [servicioForm, setServicioForm] = useState({ nombre: "", duracion: 30, precio: "" })
@@ -36,6 +41,15 @@ export default function Ajustes() {
     e.preventDefault()
     updateNegocio(identidad)
     push("Negocio actualizado")
+  }
+
+  const saveNotif = (e) => {
+    e.preventDefault()
+    updatePreferencias({
+      horasRecordatorio: Math.max(0, Number(notif.horasRecordatorio) || 0),
+      whatsappNumero: notif.whatsappNumero,
+    })
+    push("Recordatorio actualizado")
   }
 
   const saveServicio = (e) => {
@@ -122,6 +136,43 @@ export default function Ajustes() {
             })}
           </div>
           <p className="mt-4 text-xs text-[var(--fg-muted)]">El tema se aplica al instante y queda guardado.</p>
+        </div>
+      </section>
+
+      {/* Recordatorio WhatsApp */}
+      <section className="space-y-4">
+        <h2 className="flex items-center gap-2 text-sm font-bold text-[var(--fg)]"><ChatTeardrop size={18} weight="duotone" className="text-[var(--accent)]" /> Recordatorio WhatsApp</h2>
+        <form onSubmit={saveNotif} className="surface p-6 space-y-4">
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div>
+              <label className={label}>Horas antes del turno</label>
+              <input type="number" min="0" step="1" className={input} value={notif.horasRecordatorio} onChange={(e) => setNotif({ ...notif, horasRecordatorio: e.target.value })} />
+              <p className="mt-1 text-xs text-[var(--fg-muted)]">Se avisa al cliente {typeof notif.horasRecordatorio === "number" || notif.horasRecordatorio ? notif.horasRecordatorio : "2"} h antes de su cita.</p>
+            </div>
+            <div>
+              <label className={label}>Número de WhatsApp</label>
+              <input className={input} value={notif.whatsappNumero} onChange={(e) => setNotif({ ...notif, whatsappNumero: e.target.value })} placeholder="+56911112222" />
+            </div>
+          </div>
+          <div className="flex justify-end">
+            <button type="submit" className="flex items-center gap-2 bg-[var(--accent)] text-white text-sm font-semibold px-4 py-2 rounded-xl">
+              <Check size={16} weight="bold" /> Guardar recordatorio
+            </button>
+          </div>
+        </form>
+      </section>
+
+      {/* Página pública */}
+      <section className="space-y-4">
+        <h2 className="flex items-center gap-2 text-sm font-bold text-[var(--fg)]"><ArrowSquareOut size={18} weight="duotone" className="text-[var(--accent)]" /> Página pública</h2>
+        <div className="surface p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+          <div>
+            <p className="text-sm font-semibold">Tu página de reservas online</p>
+            <p className="text-xs text-[var(--fg-muted)]">Lo que ven tus clientes al escanear el QR.</p>
+          </div>
+          <a href={`#/c/${negocio.slug}`} className="inline-flex items-center gap-2 bg-[var(--accent)] text-white text-sm font-semibold px-4 py-2 rounded-xl">
+            <ArrowSquareOut size={16} weight="bold" /> Ver página
+          </a>
         </div>
       </section>
 

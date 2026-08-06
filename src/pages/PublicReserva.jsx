@@ -1,6 +1,6 @@
 import { useState } from "react"
 import { motion } from "framer-motion"
-import { ArrowLeft, ArrowRight, Check, CalendarCheck } from "@phosphor-icons/react"
+import { ArrowLeft, ArrowRight, Check } from "@phosphor-icons/react"
 import { useStore } from "@/context/store"
 import { useToast } from "@/lib/toast"
 import { formatCLP, hoyKey } from "@/lib/format"
@@ -10,7 +10,7 @@ const pasosLabel = ["Servicio", "Horario", "Tus datos", "Confirmar"]
 const MAX = pasosLabel.length - 1
 
 export default function PublicReserva() {
-  const { negocio, servicios, empleados, clientes, turnos, slotsHorario, tomarCita, addCliente } = useStore()
+  const { servicios, empleados, clientes, turnos, slotsHorario, tomarCita, addCliente } = useStore()
   const push = useToast()
   const [paso, setPaso] = useState(0)
   const [servicioId, setServicioId] = useState("")
