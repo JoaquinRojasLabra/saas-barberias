@@ -1,8 +1,9 @@
 import { motion } from "framer-motion"
-import { ChartLineUp, CalendarCheck, Users, CurrencyCircleDollar, QrCode, GearSix, SignOut } from "@phosphor-icons/react"
+import { ChartLineUp, CalendarCheck, Users, CurrencyCircleDollar, QrCode, GearSix, SignOut, Globe } from "@phosphor-icons/react"
 import { useStore } from "@/context/store"
 import { useAuth } from "@/lib/auth"
 import { cn } from "@/lib/utils"
+import { navegarA } from "@/lib/router"
 
 const items = [
   { id: "dashboard", label: "Dashboard", icon: ChartLineUp },
@@ -58,6 +59,13 @@ export default function Sidebar() {
           )
         })}
       </nav>
+
+      <button
+        onClick={() => navegarA(`/c/${negocio.slug}`)}
+        className="flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-medium text-[var(--fg-muted)] hover:text-[var(--fg)] transition-colors"
+      >
+        <Globe size={20} /> Ver página pública
+      </button>
 
       <motion.div
         whileHover={{ y: -2 }}

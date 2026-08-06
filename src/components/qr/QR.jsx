@@ -1,13 +1,15 @@
 ﻿import { motion } from "framer-motion"
 import { QRCodeSVG } from "qrcode.react"
-import { QrCode, Eye } from "@phosphor-icons/react"
+import { QrCode, Eye, ArrowSquareOut } from "@phosphor-icons/react"
 import { useStore } from "@/context/store"
 import { formatCLP } from "@/lib/format"
+import { navegarA } from "@/lib/router"
 
 export default function QR() {
   const { negocio, qrStats } = useStore()
   // scans may carry an optional monto (a scan is not a sale)
   const total = qrStats.reduce((s, q) => s + (q.monto || 0), 0)
+  const publicUrl = `${window.location.origin}${window.location.pathname}#/c/${negocio.slug}`
 
   return (
     <div className="space-y-4">
@@ -28,8 +30,15 @@ export default function QR() {
         </div>
 
         <div className="p-4 bg-white rounded-2xl">
-          <QRCodeSVG value={negocio?.qrUrl || "https://example.com"} size={200} fgColor="#111827" bgColor="#ffffff" />
+          <QRCodeSVG value={publicUrl} size={200} fgColor="#111827" bgColor="#ffffff" />
         </div>
+        <p className="text-xs text-[var(--fg-muted)]">Escanéalo para ver tu página y reservar online.</p>
+        <button
+          onClick={() => navegarA(`/c/${negocio.slug}`)}
+          className="inline-flex items-center gap-2 bg-[var(--accent)] text-white text-sm font-semibold px-4 py-2 rounded-xl"
+        >
+          <ArrowSquareOut size={16} weight="bold" /> Ver página pública
+        </button>
 
         <div className="w-full max-w-xs space-y-2">
           <div className="flex items-center justify-between surface px-4 py-3">

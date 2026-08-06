@@ -53,7 +53,10 @@ export default function Ventas() {
           <div key={v.id} className="flex items-center justify-between gap-3 border border-[var(--border)] rounded-xl px-4 py-3 surface">
             <div>
               <p className="text-sm font-semibold">{getCliente(v.clienteId)?.nombre || "Cliente"}</p>
-              <p className="text-xs text-[var(--fg-muted)]">{getServicio(v.servicioId)?.nombre || "Servicio"} Â· {formatHora(v.fechaHora)}</p>
+              <p className="text-xs text-[var(--fg-muted)]">{getServicio(v.servicioId)?.nombre || "Servicio"} · {formatHora(v.fechaHora)}</p>
+              <span className="mt-1 inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-lg bg-[var(--accent)]/10 text-[var(--accent)]">
+                {v.metodo || "Efectivo"}
+              </span>
             </div>
             <p className="text-sm font-extrabold">{formatCLP(v.monto)}</p>
           </div>
