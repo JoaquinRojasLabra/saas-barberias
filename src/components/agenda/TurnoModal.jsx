@@ -37,8 +37,8 @@ export default function TurnoModal({ onClose }) {
   }
 
   return (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4" onClick={onClose}>
-      <motion.div ref={ref} tabIndex={-1} role="dialog" aria-modal="true" aria-labelledby="turno-modal-title" initial={{ scale: 0.95, y: 10 }} animate={{ scale: 1, y: 0 }} onClick={(e) => e.stopPropagation()} className="w-full max-w-md surface rounded-2xl p-6 shadow-2xl outline-none">
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="fixed inset-0 z-50 bg-black/40 flex items-end sm:items-center justify-center p-3 sm:p-4" onClick={onClose}>
+      <motion.div ref={ref} tabIndex={-1} role="dialog" aria-modal="true" aria-labelledby="turno-modal-title" initial={{ scale: 0.95, y: 12 }} animate={{ scale: 1, y: 0 }} onClick={(e) => e.stopPropagation()} className="w-full max-w-md max-h-[88vh] sm:max-h-[80vh] surface rounded-2xl p-5 sm:p-6 shadow-2xl outline-none overflow-y-auto">
         <div className="flex items-center justify-between mb-4">
           <h2 id="turno-modal-title" className="text-lg font-bold">Nuevo turno</h2>
           <button onClick={onClose} aria-label="Cerrar" className="text-[var(--fg-muted)] hover:text-[var(--fg)]"><X size={20} /></button>

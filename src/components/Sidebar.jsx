@@ -19,7 +19,7 @@ export default function Sidebar() {
   const { logout } = useAuth()
 
   return (
-    <aside className="app-chrome w-60 shrink-0 h-screen sticky top-0 flex flex-col gap-6 px-4 py-6 bg-[var(--bg-card)] border-r border-[var(--border)]">
+    <aside className="app-chrome hidden lg:flex w-60 shrink-0 h-screen sticky top-0 flex-col gap-6 px-4 py-6 bg-[var(--bg-card)] border-r border-[var(--border)]">
       <div className="px-2 flex items-center gap-2">
         <motion.span
           initial={{ scale: 0 }}
