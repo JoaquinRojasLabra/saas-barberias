@@ -2,9 +2,11 @@ import { lazy, Suspense } from "react"
 import { AnimatePresence, motion } from "framer-motion"
 import { StoreProvider, useStore } from "@/context/store"
 import { ToastProvider } from "@/lib/toast"
+import { AuthProvider, useAuth } from "@/lib/auth"
 import Background from "@/components/Background"
 import Sidebar from "@/components/Sidebar"
 import Topbar from "@/components/Topbar"
+import Login from "@/components/Login"
 import Dashboard from "@/components/dashboard/Dashboard"
 import Agenda from "@/components/agenda/Agenda"
 import Ventas from "@/components/ventas/Ventas"
@@ -16,6 +18,9 @@ const ParticleField = lazy(() => import("@/components/ParticleField"))
 
 function Shell() {
   const { view } = useStore()
+  const { authed } = useAuth()
+
+  if (!authed) return <Login />
 
   return (
     <div className="flex h-screen relative">
@@ -52,9 +57,11 @@ function Shell() {
 export default function App() {
   return (
     <StoreProvider>
-      <ToastProvider>
-        <Shell />
-      </ToastProvider>
+      <AuthProvider>
+        <ToastProvider>
+          <Shell />
+        </ToastProvider>
+      </AuthProvider>
     </StoreProvider>
   )
 }

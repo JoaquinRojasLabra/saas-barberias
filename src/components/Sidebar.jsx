@@ -1,6 +1,7 @@
 import { motion } from "framer-motion"
-import { ChartLineUp, CalendarCheck, Users, CurrencyCircleDollar, QrCode, GearSix } from "@phosphor-icons/react"
+import { ChartLineUp, CalendarCheck, Users, CurrencyCircleDollar, QrCode, GearSix, SignOut } from "@phosphor-icons/react"
 import { useStore } from "@/context/store"
+import { useAuth } from "@/lib/auth"
 import { cn } from "@/lib/utils"
 
 const items = [
@@ -14,6 +15,7 @@ const items = [
 
 export default function Sidebar() {
   const { view, setView, negocio, empleados } = useStore()
+  const { logout } = useAuth()
 
   return (
     <aside className="app-chrome w-60 shrink-0 h-screen sticky top-0 flex flex-col gap-6 px-4 py-6 bg-[var(--bg-card)] border-r border-[var(--border)]">
@@ -63,6 +65,12 @@ export default function Sidebar() {
       >
         <p className="font-semibold text-[var(--fg)]">{empleados[0]?.nombre || "Dueño"}</p>
         <p>Dueño · {negocio.nombre}</p>
+        <button
+          onClick={logout}
+          className="mt-2 flex items-center gap-1.5 text-xs font-medium text-[var(--fg-muted)] hover:text-red-500 transition-colors"
+        >
+          <SignOut size={14} /> Cerrar sesión
+        </button>
       </motion.div>
     </aside>
   )

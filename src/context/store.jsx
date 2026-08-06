@@ -60,6 +60,9 @@ export function StoreProvider({ children }) {
     return c
   }
 
+  const updateCliente = (id, patch) =>
+    setClientes((prev) => prev.map((c) => (c.id === id ? { ...c, ...patch } : c)))
+
   const addServicio = (servicio) => {
     const s = { id: `s${Date.now()}`, ...servicio }
     setServicios((prev) => [...prev, s])
@@ -77,7 +80,7 @@ export function StoreProvider({ children }) {
     turnos, clientes, ventas, qrStats,
     view, setView,
     updateNegocio, addVenta, addTurno, setTurnoEstado, addQrScan,
-    addCliente, addServicio, updateServicio, removeServicio,
+    addCliente, updateCliente, addServicio, updateServicio, removeServicio,
   }
 
   return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>

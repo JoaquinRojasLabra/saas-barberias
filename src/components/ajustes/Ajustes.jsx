@@ -1,13 +1,15 @@
 import { useState } from "react"
-import { Plus, Trash, PencilSimple, Check, X, Storefront, Palette, Scissors, Clock } from "@phosphor-icons/react"
+import { Plus, Trash, PencilSimple, Check, X, Storefront, Palette, Scissors, Clock, Key } from "@phosphor-icons/react"
 import { useStore } from "@/context/store"
 import { useTheme } from "@/lib/theme"
 import { useToast } from "@/lib/toast"
+import { useAuth } from "@/lib/auth"
 
 export default function Ajustes() {
   const { negocio, servicios, updateNegocio, addServicio, updateServicio, removeServicio } = useStore()
   const { theme, setTheme, THEMES } = useTheme()
   const push = useToast()
+  const { updateCredentials } = useAuth()
 
   const [identidad, setIdentidad] = useState({
     nombre: negocio.nombre,
@@ -18,6 +20,17 @@ export default function Ajustes() {
 
   const [servicioForm, setServicioForm] = useState({ nombre: "", duracion: 30, precio: "" })
   const [editId, setEditId] = useState(null)
+
+  const [creds, setCreds] = useState({ user: "", pass: "", confirm: "" })
+
+  const saveCreds = (e) => {
+    e.preventDefault()
+    if (!creds.user.trim() || !creds.pass) return
+    if (creds.pass !== creds.confirm) return
+    updateCredentials(creds.user.trim(), creds.pass)
+    setCreds({ user: "", pass: "", confirm: "" })
+    push("Credenciales actualizadas")
+  }
 
   const saveIdentidad = (e) => {
     e.preventDefault()
@@ -164,6 +177,35 @@ export default function Ajustes() {
         <div className="surface p-6">
           <p className="text-sm text-[var(--fg-muted)]">La gestión de horarios y empleados llega en la siguiente fase.</p>
         </div>
+      </section>
+
+      {/* Acceso */}
+      <section className="space-y-4">
+        <h2 className="flex items-center gap-2 text-sm font-bold text-[var(--fg)]"><Key size={18} weight="duotone" className="text-[var(--accent)]" /> Acceso del barbero</h2>
+        <form onSubmit={saveCreds} className="surface p-6 space-y-4">
+          <div className="grid gap-4 sm:grid-cols-3">
+            <div>
+              <label className={label}>Usuario</label>
+              <input className={input} value={creds.user} onChange={(e) => setCreds({ ...creds, user: e.target.value })} placeholder="demo" required />
+            </div>
+            <div>
+              <label className={label}>Nueva contraseña</label>
+              <input type="password" className={input} value={creds.pass} onChange={(e) => setCreds({ ...creds, pass: e.target.value })} placeholder="••••••••" required />
+            </div>
+            <div>
+              <label className={label}>Confirmar contraseña</label>
+              <input type="password" className={input} value={creds.confirm} onChange={(e) => setCreds({ ...creds, confirm: e.target.value })} placeholder="••••••••" required />
+            </div>
+          </div>
+          {creds.pass && creds.confirm && creds.pass !== creds.confirm && (
+            <p className="text-xs text-red-500">Las contraseñas no coinciden.</p>
+          )}
+          <div className="flex justify-end">
+            <button type="submit" className="flex items-center gap-2 bg-[var(--accent)] text-white text-sm font-semibold px-4 py-2 rounded-xl">
+              <Check size={16} weight="bold" /> Guardar credenciales
+            </button>
+          </div>
+        </form>
       </section>
     </div>
   )
