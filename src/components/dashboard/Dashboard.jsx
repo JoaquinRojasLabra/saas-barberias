@@ -5,6 +5,7 @@ import { formatCLP, hoyKey } from "@/lib/format"
 import MetricCard from "./MetricCard"
 import ProgressRing from "./ProgressRing"
 import SalesChart from "./SalesChart"
+import CountUp from "@/components/CountUp"
 
 export default function Dashboard() {
   const { ventas, turnos, qrStats } = useStore()
@@ -31,10 +32,10 @@ export default function Dashboard() {
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
-        <MetricCard icon={CurrencyCircleDollar} label="Ventas hoy" value={formatCLP(resumen.totalHoy)} sub={{ text: `Meta ${formatCLP(resumen.metaDia)}` }} delay={0} />
-        <MetricCard icon={CalendarCheck} label="Turnos hoy" value={resumen.turnosHoy} sub={{ text: "agendados" }} delay={0.1} />
-        <MetricCard icon={UserMinus} label="No-shows" value={resumen.noShows} sub={{ text: resumen.noShows > 0 ? "revisa agenda" : "todo perfecto", className: resumen.noShows > 0 ? "text-red-500" : "text-green-600" }} delay={0.2} />
-        <MetricCard icon={Users} label="Escaneos QR" value={resumen.escaneos} sub={{ text: "esta semana" }} delay={0.3} />
+        <MetricCard icon={CurrencyCircleDollar} label="Ventas hoy" value={<CountUp n={resumen.totalHoy} format={(v) => formatCLP(v)} />} sub={{ text: `Meta ${formatCLP(resumen.metaDia)}` }} delay={0} />
+        <MetricCard icon={CalendarCheck} label="Turnos hoy" value={<CountUp n={resumen.turnosHoy} />} sub={{ text: "agendados" }} delay={0.1} />
+        <MetricCard icon={UserMinus} label="No-shows" value={<CountUp n={resumen.noShows} />} sub={{ text: resumen.noShows > 0 ? "revisa agenda" : "todo perfecto", className: resumen.noShows > 0 ? "text-red-500" : "text-green-600" }} delay={0.2} />
+        <MetricCard icon={Users} label="Escaneos QR" value={<CountUp n={resumen.escaneos} />} sub={{ text: "esta semana" }} delay={0.3} />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">

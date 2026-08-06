@@ -1,4 +1,5 @@
 import { motion } from "framer-motion"
+import CountUp from "@/components/CountUp"
 
 export default function ProgressRing({ value, max, label }) {
   const pct = max > 0 ? Math.min(100, Math.round((value / max) * 100)) : 0
@@ -20,7 +21,7 @@ export default function ProgressRing({ value, max, label }) {
         />
       </svg>
       <div className="text-center">
-        <p className="text-3xl font-extrabold tracking-tight">{pct}%</p>
+        <p className="text-3xl font-extrabold tracking-tight"><CountUp n={pct} format={(v) => `${Math.round(v)}%`} /></p>
         <p className="text-xs text-[var(--fg-muted)]">{label}</p>
       </div>
     </div>

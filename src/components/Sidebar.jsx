@@ -15,7 +15,7 @@ export default function Sidebar() {
   const { view, setView, negocio, empleados } = useStore()
 
   return (
-    <aside className="w-60 shrink-0 h-screen sticky top-0 flex flex-col gap-6 px-4 py-6 bg-[var(--bg-card)] border-r border-[var(--border)]">
+    <aside className="app-chrome w-60 shrink-0 h-screen sticky top-0 flex flex-col gap-6 px-4 py-6 bg-[var(--bg-card)] border-r border-[var(--border)]">
       <div className="px-2">
         <p className="text-sm font-extrabold tracking-tight">{negocio.nombre}</p>
         <p className="text-xs text-[var(--fg-muted)]">{negocio.direccion}</p>

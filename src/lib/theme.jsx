@@ -2,6 +2,11 @@ import { createContext, useContext, useState, useEffect } from "react"
 
 export const THEMES = [
   { id: "elegante", label: "Elegante" },
+  { id: "noir", label: "Noir" },
+  { id: "glass", label: "Glass" },
+  { id: "clay", label: "Clay" },
+  { id: "brutal", label: "Brutal" },
+  { id: "minimal", label: "Minimal" },
   { id: "fintech", label: "Fintech" },
 ]
 
@@ -11,7 +16,9 @@ export function ThemeProvider({ children }) {
   const [theme, setTheme] = useState("elegante")
 
   useEffect(() => {
-    document.documentElement.classList.toggle("theme-fintech", theme === "fintech")
+    const root = document.documentElement
+    THEMES.forEach((t) => root.classList.remove(`theme-${t.id}`))
+    if (theme !== "elegante") root.classList.add(`theme-${theme}`)
   }, [theme])
 
   return (
