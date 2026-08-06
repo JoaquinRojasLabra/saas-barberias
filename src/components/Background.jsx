@@ -37,12 +37,6 @@ export default function Background() {
         }}
       />
 
-      {/* Olas de luz animadas (ec. Glacier) */}
-      <div
-        className="absolute inset-0 pointer-events-none aurora-waves"
-        aria-hidden
-      />
-
       {/* Patrón de textura por tema (grid de puntos, veta de arcilla, etc.) */}
       <div
         className="absolute inset-0 pointer-events-none"
