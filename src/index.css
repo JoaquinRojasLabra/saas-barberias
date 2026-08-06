@@ -464,3 +464,74 @@ button:not([data-global]) {
 /* Chrome translúcido (temas glass) */
 .theme-glass .app-chrome { backdrop-filter: blur(var(--blur)); }
 .theme-glass .app-chrome, .theme-glass input, .theme-glass select { -webkit-backdrop-filter: blur(var(--blur)); }
+
+/* =========================================================
+   Feedback de botones · elevación + brillo + pulsación
+   Aplica a TODO botón; el glow usa el color de acento del tema.
+   ========================================================= */
+
+button {
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1),
+    box-shadow 0.25s ease,
+    filter 0.25s ease,
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease;
+}
+
+/* Hover: eleva y enciende el borde/acento */
+button:not(:disabled):hover {
+  transform: translateY(-2px);
+  filter: brightness(1.06) saturate(1.05);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 22%, transparent),
+    0 10px 24px -10px color-mix(in srgb, var(--accent) 55%, transparent);
+}
+
+/* Pulsación al tocar / click */
+button:not(:disabled):active {
+  transform: translateY(0) scale(0.96);
+  filter: brightness(0.96);
+  transition-duration: 0.06s;
+}
+
+/* Brillo de acento más intenso en botones primarios */
+button:not(:disabled):not([data-global]) {
+  text-shadow: 0 0 1px color-mix(in srgb, var(--accent) 30%, transparent);
+}
+
+/* Saturación extra para botones que ya llevan el color de marca */
+button:where([class*="bg-[var(--accent)]"]) {
+  position: relative;
+  overflow: hidden;
+}
+button:where([class*="bg-[var(--accent)]"]):not(:disabled):hover {
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 30%, transparent),
+    0 14px 34px -12px color-mix(in srgb, var(--accent) 75%, transparent);
+}
+button:where([class*="bg-[var(--accent)]"]):not(:disabled):hover::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(120deg, transparent 30%, rgba(255, 255, 255, 0.28) 50%, transparent 70%);
+  animation: btn-shine 0.7s ease;
+}
+
+@keyframes btn-shine {
+  from { transform: translateX(-110%); }
+  to { transform: translateX(110%); }
+}
+
+/* Respetar usuarios que prefieren menos movimiento */
+@media (prefers-reduced-motion: reduce) {
+  button {
+    transition: none;
+    transform: none !important;
+  }
+  button::after {
+    animation: none !important;
+    display: none;
+  }
+}
