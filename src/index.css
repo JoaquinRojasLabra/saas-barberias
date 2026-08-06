@@ -48,6 +48,88 @@
   --bg-pattern-size: 24px 24px;
 }
 
+/* ---- Midnight · azul profundo cian eléctrico */
+.theme-midnight {
+  color-scheme: dark;
+  --font-sans: "Segoe UI", ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-sans);
+  --font-body: var(--font-sans);
+
+  --bg: #070b18;
+  --bg-card: #0f172e;
+  --fg: #e8ecff;
+  --fg-muted: #8b94c9;
+  --accent: #38e1ff;
+  --accent-2: #7c6bff;
+  --ring-track: #1d2642;
+  --border: #1d2642;
+  --border-w: 1px;
+  --radius: 16px;
+  --shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+  --shadow-lg: 0 26px 60px -20px rgba(0, 0, 0, 0.75);
+  --blur: 0;
+
+  --surface-bg: #11172e;
+  --surface-blur: none;
+  --surface-blurw: 0;
+  --surface-saturate: 100%;
+  --surface-border: #243055;
+  --surface-radius: 16px;
+  --surface-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+  --surface-inner: inset 0 1px 0 rgba(255, 255, 255, 0.07);
+  --surface-tint: 56, 225, 255;
+
+  --orb-1: rgba(56, 225, 255, 0.2);
+  --orb-2: rgba(124, 107, 255, 0.22);
+  --orb-3: rgba(40, 90, 255, 0.14);
+
+  --bg-pattern: radial-gradient(rgba(56, 225, 255, 0.12) 1px, transparent 1px);
+  --bg-pattern-size: 28px 28px;
+  --bg-pattern-opacity: 0.5;
+  --grain-opacity: 0.06;
+}
+
+/* ---- Emerald · bosque oscuro lima */
+.theme-emerald {
+  color-scheme: dark;
+  --font-sans: "Segoe UI", ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-sans);
+  --font-body: var(--font-sans);
+
+  --bg: #08110d;
+  --bg-card: #0f1d16;
+  --fg: #eafff3;
+  --fg-muted: #8fb3a0;
+  --accent: #5bff9b;
+  --accent-2: #ffd166;
+  --ring-track: #1b2c22;
+  --border: #1b3426;
+  --border-w: 1px;
+  --radius: 14px;
+  --shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+  --shadow-lg: 0 26px 60px -20px rgba(0, 0, 0, 0.7);
+  --blur: 0;
+
+  --surface-bg: #0f1f16;
+  --surface-blur: none;
+  --surface-blurw: 0;
+  --surface-saturate: 100%;
+  --surface-border: #21402e;
+  --surface-radius: 14px;
+  --surface-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+  --surface-inner: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  --surface-tint: 91, 255, 155;
+
+  --orb-1: rgba(16, 255, 155, 0.18);
+  --orb-2: rgba(255, 209, 102, 0.14);
+  --orb-3: rgba(16, 120, 80, 0.2);
+
+  --bg-pattern: radial-gradient(rgba(91, 255, 155, 0.1) 1px, transparent 1px);
+  --bg-pattern-size: 26px 26px;
+  --bg-pattern-opacity: 0.5;
+  --grain-opacity: 0.06;
+}
+
 /* Noir · dark luxury */
 .theme-noir {
   color-scheme: dark;

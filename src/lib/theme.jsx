@@ -8,6 +8,8 @@ export const THEMES = [
   { id: "brutal", label: "Brutal" },
   { id: "minimal", label: "Minimal" },
   { id: "fintech", label: "Fintech" },
+  { id: "midnight", label: "Midnight" },
+  { id: "emerald", label: "Emerald" },
 ]
 
 const ThemeContext = createContext()
