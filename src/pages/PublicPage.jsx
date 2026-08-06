@@ -4,7 +4,7 @@ import { CalendarCheck, Phone, MapPin, Clock, ArrowRight, Scissors } from "@phos
 import { useStore } from "@/context/store"
 import { useTheme } from "@/lib/theme"
 import { formatCLP } from "@/lib/format"
-import { navegarA } from "@/lib/router"
+import { navegarA, leerRuta, parametrosDe } from "@/lib/router"
 import Logo3D from "@/components/public/Logo3D"
 
 export default function PublicPage() {
@@ -12,7 +12,9 @@ export default function PublicPage() {
   const { theme, setTheme } = useTheme()
 
   useEffect(() => {
-    if (negocio.tema) setTheme(negocio.tema)
+    const { query } = leerRuta()
+    const { tema } = parametrosDe(query)
+    setTheme(tema || negocio.tema || "elegante")
   }, [negocio.tema, setTheme])
 
   return (
@@ -31,7 +33,11 @@ export default function PublicPage() {
           <motion.button
             whileHover={{ scale: 1.03 }}
             whileTap={{ scale: 0.97 }}
-            onClick={() => navegarA(`/c/${negocio.slug}/reserva`)}
+            onClick={() => {
+              const { query } = leerRuta()
+              const { tema } = parametrosDe(query)
+              navegarA(`/c/${negocio.slug}/reserva${tema ? `?tema=${tema}` : ""}`)
+            }}
             className="mt-4 inline-flex items-center gap-2 bg-[var(--accent)] text-white font-semibold px-6 py-3 rounded-2xl shadow-[var(--shadow-lg)]"
           >
             <CalendarCheck size={20} weight="bold" /> Reservar hora

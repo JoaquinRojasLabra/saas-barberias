@@ -9,7 +9,7 @@ export default function QR() {
   const { negocio, qrStats } = useStore()
   // scans may carry an optional monto (a scan is not a sale)
   const total = qrStats.reduce((s, q) => s + (q.monto || 0), 0)
-  const publicUrl = `${window.location.origin}${window.location.pathname}#/c/${negocio.slug}`
+  const publicUrl = `${window.location.origin}${window.location.pathname}#/c/${negocio.slug}?tema=${negocio.tema || "elegante"}`
 
   return (
     <div className="space-y-4">

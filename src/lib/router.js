@@ -24,6 +24,10 @@ export function slugDe(path) {
   return m ? m[1] : ""
 }
 
+export function parametrosDe(query) {
+  return Object.fromEntries(new URLSearchParams(query))
+}
+
 export function useHashRoute() {
   const [route, setRoute] = useState(() => leerRuta())
   useEffect(() => {

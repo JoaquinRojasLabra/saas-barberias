@@ -5,7 +5,7 @@ import { useStore } from "@/context/store"
 import { useTheme } from "@/lib/theme"
 import { useToast } from "@/lib/toast"
 import { formatCLP, hoyKey } from "@/lib/format"
-import { navegarA, slugDe } from "@/lib/router"
+import { navegarA, slugDe, leerRuta, parametrosDe } from "@/lib/router"
 
 const pasosLabel = ["Servicio", "Horario", "Tus datos", "Confirmar"]
 const MAX = pasosLabel.length - 1
@@ -45,7 +45,9 @@ export default function PublicReserva() {
   }
 
   useEffect(() => {
-    if (negocio.tema) setTheme(negocio.tema)
+    const { query } = leerRuta()
+    const { tema } = parametrosDe(query)
+    setTheme(tema || negocio.tema || "elegante")
   }, [negocio.tema, setTheme])
 
   const input = "w-full surface px-3 py-2 text-sm"
