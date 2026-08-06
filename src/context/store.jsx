@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect } from "react"
-import { negocio as negocioMock, servicios as serviciosMock, clientesMock, turnosMock, ventasMock, qrStatsMock, empleados } from "@/data/mock"
+import { negocio as negocioMock, servicios as serviciosMock, clientesMock, turnosMock, ventasMock, qrStatsMock, empleados, slotsHorario } from "@/data/mock"
 
 const StoreContext = createContext()
 
@@ -48,6 +48,17 @@ export function StoreProvider({ children }) {
 
   const addTurno = (turno) => setTurnos((prev) => [{ id: `t${Date.now()}`, ...turno }, ...prev])
 
+  const tomarCita = ({ clienteId, servicioId, fecha, hora, empleadoId }) => {
+    const t = { id: `t${Date.now()}`, clienteId, servicioId, fecha, hora, estado: "confirmado", empleadoId, origen: "web-publico" }
+    setTurnos((prev) => [t, ...prev])
+    return t
+  }
+
+  const generarLinkPago = (monto, concepto) => {
+    const ref = `MP-${Date.now()}`
+    return { ref, url: `https://mp.la/${ref}`, monto, concepto }
+  }
+
   const setTurnoEstado = (id, estado) =>
     setTurnos((prev) => prev.map((t) => (t.id === id ? { ...t, estado } : t)))
 
@@ -76,10 +87,11 @@ export function StoreProvider({ children }) {
     setServicios((prev) => prev.filter((s) => s.id !== id))
 
   const value = {
-    negocio, servicios, empleados,
+    negocio, servicios, empleados, slotsHorario,
     turnos, clientes, ventas, qrStats,
     view, setView,
     updateNegocio, addVenta, addTurno, setTurnoEstado, addQrScan,
+    tomarCita, generarLinkPago,
     addCliente, updateCliente, addServicio, updateServicio, removeServicio,
   }
 

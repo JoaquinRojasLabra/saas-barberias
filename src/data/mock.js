@@ -3,9 +3,12 @@ export const negocio = {
   nombre: "Barbería El Cauce",
   direccion: "San Antonio 412, Santiago",
   telefono: "+56955551111",
+  slug: "el-cauce",
   qrUrl: "https://wa.me/56955551111",
   tema: "elegante",
 }
+
+export const slotsHorario = ["09:00", "10:00", "11:00", "12:00", "13:00", "15:00", "16:00", "17:00", "18:00"]
 
 export const servicios = [
   { id: "s1", nombre: "Corte clásico", precio: 12000, duracion: 40 },
