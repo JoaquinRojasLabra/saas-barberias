@@ -41,6 +41,11 @@
   --orb-2: color-mix(in srgb, var(--accent-2) 16%, transparent);
   --orb-3: color-mix(in srgb, #7c3aed 12%, transparent);
   --grain-opacity: 0.035;
+
+  /* Patrón de textura del fondo (por tema) */
+  --bg-pattern: none;
+  --bg-pattern-opacity: 0;
+  --bg-pattern-size: 24px 24px;
 }
 
 /* Noir · dark luxury */
@@ -86,34 +91,38 @@
   --font-display: var(--font-sans);
   --font-body: var(--font-sans);
 
-  --bg: #eef1fb;
+  --bg: #dfe5fb;
   --bg-card: rgba(255, 255, 255, 0.18);
   --fg: #1d2135;
-  --fg-muted: #5b6080;
+  --fg-muted: #565c80;
   --accent: #6d7cff;
   --accent-2: #22c1a4;
   --ring-track: rgba(109, 124, 255, 0.18);
-  --border: rgba(255, 255, 255, 0.28);
+  --border: rgba(255, 255, 255, 0.38);
   --border-w: 1px;
   --radius: 18px;
   --shadow: 0 8px 24px -12px rgba(60, 80, 180, 0.35);
   --shadow-lg: 0 24px 60px -18px rgba(60, 80, 180, 0.4);
   --blur: 14px;
 
-  --surface-bg: rgba(255, 255, 255, 0.12);
+  --surface-bg: rgba(255, 255, 255, 0.14);
   --surface-blur: blur(20px);
   --surface-blurw: 20px;
   --surface-saturate: 180%;
-  --surface-border: rgba(255, 255, 255, 0.32);
+  --surface-border: rgba(255, 255, 255, 0.55);
   --surface-radius: 20px;
   --surface-shadow: 0 8px 32px -12px rgba(60, 80, 180, 0.4);
-  --surface-inner: inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  --surface-inner: inset 0 1px 0 rgba(255, 255, 255, 0.6);
   --surface-tint: 255, 255, 255;
 
-  --orb-1: rgba(140, 160, 255, 0.5);
-  --orb-2: rgba(34, 193, 164, 0.38);
-  --orb-3: rgba(236, 72, 153, 0.28);
-  --grain-opacity: 0.028;
+  --orb-1: rgba(120, 140, 255, 0.7);
+  --orb-2: rgba(34, 193, 164, 0.5);
+  --orb-3: rgba(236, 120, 200, 0.4);
+
+  --bg-pattern: radial-gradient(rgba(120, 140, 255, 0.28) 1px, transparent 1px);
+  --bg-pattern-size: 26px 26px;
+  --bg-pattern-opacity: 0.5;
+  --grain-opacity: 0.03;
 }
 
 /* ---- Clay · cálido 3D */
@@ -123,34 +132,38 @@
   --font-display: var(--font-sans);
   --font-body: var(--font-sans);
 
-  --bg: #e9e4da;
+  --bg: #ece5d8;
   --bg-card: #fdf9f1;
-  --fg: #3a332b;
-  --fg-muted: #8a8376;
-  --accent: #d9822b;
-  --accent-2: #6f5b8f;
-  --ring-track: #e2d8c8;
-  --border: #e7dbc6;
+  --fg: #423a31;
+  --fg-muted: #8f8371;
+  --accent: #c46a2a;
+  --accent-2: #7a6a22;
+  --ring-track: #e2d8c6;
+  --border: #423a31;
   --border-w: 1px;
   --radius: 22px;
-  --shadow: 0 10px 18px -8px rgba(122, 92, 50, 0.35);
-  --shadow-lg: 0 26px 50px -18px rgba(122, 92, 50, 0.45);
+  --shadow: 0 10px 18px -8px rgba(122, 82, 40, 0.35);
+  --shadow-lg: 0 26px 50px -18px rgba(122, 82, 40, 0.45);
   --blur: 0;
 
-  --surface-bg: #fbf6ec;
+  --surface-bg: #f2e9d8;
   --surface-blur: none;
   --surface-blurw: 0;
   --surface-saturate: 100%;
-  --surface-border: #f3ead8;
+  --surface-border: #423a31;
   --surface-radius: 24px;
-  --surface-shadow: 0 18px 34px -16px rgba(122, 92, 50, 0.5);
-  --surface-inner: inset 0 2px 3px rgba(255, 255, 255, 0.85), inset 0 -3px 6px rgba(122, 92, 50, 0.12);
-  --surface-tint: 217, 130, 43;
+  --surface-shadow: 0 18px 34px -16px rgba(122, 82, 40, 0.5);
+  --surface-inner: inset 0 -4px 6px rgba(122, 82, 40, 0.12), inset 0 2px 3px rgba(255, 255, 255, 0.85);
+  --surface-tint: 180, 106, 42;
 
-  --orb-1: rgba(217, 130, 43, 0.2);
-  --orb-2: rgba(143, 122, 180, 0.18);
-  --orb-3: rgba(222, 176, 120, 0.22);
-  --grain-opacity: 0.04;
+  --orb-1: rgba(196, 106, 42, 0.22);
+  --orb-2: rgba(138, 120, 60, 0.2);
+  --orb-3: rgba(214, 168, 120, 0.18);
+
+  --bg-pattern: radial-gradient(rgba(122, 82, 40, 0.12) 1.2px, transparent 1.6px);
+  --bg-pattern-size: 7px 7px;
+  --bg-pattern-opacity: 0.55;
+  --grain-opacity: 0.035;
 }
 
 /* ---- Brutal · contraste duro */
@@ -225,7 +238,11 @@
   --orb-1: rgba(17, 17, 17, 0.05);
   --orb-2: rgba(17, 17, 17, 0.04);
   --orb-3: rgba(17, 17, 17, 0.03);
-  --grain-opacity: 0.02;
+
+  --bg-pattern: radial-gradient(rgba(17, 17, 17, 0.06) 1px, transparent 1px);
+  --bg-pattern-size: 22px 22px;
+  --bg-pattern-opacity: 0.8;
+  --grain-opacity: 0.015;
 }
 
 /* ---- Fintech · oscuro vibrante */

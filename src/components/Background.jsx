@@ -36,6 +36,16 @@ export default function Background() {
           mixBlendMode: "overlay",
         }}
       />
+
+      {/* Patrón de textura por tema (grid de puntos, veta de arcilla, etc.) */}
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          backgroundImage: "var(--bg-pattern)",
+          backgroundSize: "var(--bg-pattern-size)",
+          opacity: "var(--bg-pattern-opacity)",
+        }}
+      />
     </div>
   )
 }
