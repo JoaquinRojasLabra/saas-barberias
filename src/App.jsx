@@ -1,4 +1,5 @@
 import { lazy, Suspense } from "react"
+import { AnimatePresence, motion } from "framer-motion"
 import { StoreProvider, useStore } from "@/context/store"
 import Background from "@/components/Background"
 import Sidebar from "@/components/Sidebar"
@@ -24,11 +25,21 @@ function Shell() {
       <div className="flex-1 flex flex-col overflow-y-auto">
         <Topbar />
         <main className="flex-1 p-6">
-          {view === "dashboard" && <Dashboard />}
-          {view === "agenda" && <Agenda />}
-          {view === "clientes" && <Clientes />}
-          {view === "ventas" && <Ventas />}
-          {view === "qr" && <QR />}
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={view}
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.22, ease: "easeOut" }}
+            >
+              {view === "dashboard" && <Dashboard />}
+              {view === "agenda" && <Agenda />}
+              {view === "clientes" && <Clientes />}
+              {view === "ventas" && <Ventas />}
+              {view === "qr" && <QR />}
+            </motion.div>
+          </AnimatePresence>
         </main>
       </div>
     </div>

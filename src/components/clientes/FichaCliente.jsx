@@ -27,7 +27,7 @@ export default function FichaCliente({ cliente, onClose }) {
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4" onClick={onClose}>
-      <motion.div ref={ref} tabIndex={-1} role="dialog" aria-modal="true" aria-labelledby="ficha-cliente-title" initial={{ scale: 0.95, y: 10 }} animate={{ scale: 1, y: 0 }} onClick={(e) => e.stopPropagation()} className="w-full max-w-md max-h-[80vh] bg-[var(--bg-card)] border border-[var(--border)] rounded-2xl shadow-2xl outline-none flex flex-col">
+      <motion.div ref={ref} tabIndex={-1} role="dialog" aria-modal="true" aria-labelledby="ficha-cliente-title" initial={{ scale: 0.95, y: 10 }} animate={{ scale: 1, y: 0 }} onClick={(e) => e.stopPropagation()} className="w-full max-w-md max-h-[80vh] surface rounded-2xl shadow-2xl outline-none flex flex-col">
         <div className="flex items-start justify-between gap-3 p-6 pb-0">
           <div className="flex items-center gap-3 min-w-0">
             <div className="flex items-center justify-center w-12 h-12 rounded-full bg-[var(--accent)] text-white font-bold text-lg shrink-0">

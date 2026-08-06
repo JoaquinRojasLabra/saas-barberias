@@ -8,7 +8,7 @@ export default function ProgressRing({ value, max, label }) {
   const len = (C * pct) / 100
 
   return (
-    <div className="flex flex-col items-center justify-center gap-3 bg-[var(--bg-card)] border border-[var(--border)] rounded-2xl p-6 shadow-[var(--shadow)]">
+    <div className="flex flex-col items-center justify-center gap-3 surface surface-hover rounded-2xl p-6">
       <svg width="140" height="140" viewBox="0 0 140 140">
         <circle cx="70" cy="70" r={R} fill="none" stroke="var(--ring-track)" strokeWidth="10" />
         <motion.circle

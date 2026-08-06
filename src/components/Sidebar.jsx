@@ -16,11 +16,20 @@ export default function Sidebar() {
 
   return (
     <aside className="app-chrome w-60 shrink-0 h-screen sticky top-0 flex flex-col gap-6 px-4 py-6 bg-[var(--bg-card)] border-r border-[var(--border)]">
-      <div className="px-2">
-        <p className="text-sm font-extrabold tracking-tight">{negocio.nombre}</p>
-        <p className="text-xs text-[var(--fg-muted)]">{negocio.direccion}</p>
+      <div className="px-2 flex items-center gap-2">
+        <motion.span
+          initial={{ scale: 0 }}
+          animate={{ scale: 1 }}
+          transition={{ type: "spring", stiffness: 300, damping: 18 }}
+          className="brand-orb shrink-0"
+        />
+        <div>
+          <p className="text-sm font-extrabold tracking-tight">{negocio.nombre}</p>
+          <p className="text-xs text-[var(--fg-muted)]">{negocio.direccion}</p>
+        </div>
       </div>
-      <nav className="flex flex-col gap-1">
+
+      <nav className="flex flex-col gap-1.5">
         {items.map((it) => {
           const Icon = it.icon
           const active = view === it.id
@@ -28,15 +37,29 @@ export default function Sidebar() {
             <button
               key={it.id}
               onClick={() => setView(it.id)}
-              className={cn("flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors", active ? "bg-[var(--accent)] text-white" : "text-[var(--fg-muted)] hover:bg-black/5")}
+              className={cn(
+                "relative flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors",
+                active ? "text-white" : "text-[var(--fg-muted)] hover:text-[var(--fg)]",
+              )}
             >
-              <Icon size={20} weight={active ? "fill" : "regular"} />
-              {it.label}
+              {active && (
+                <motion.span
+                  layoutId="nav-highlight"
+                  className="absolute inset-0 rounded-xl bg-[var(--accent)] shadow-[var(--shadow)]"
+                  transition={{ type: "spring", stiffness: 420, damping: 34 }}
+                />
+              )}
+              <Icon size={20} weight={active ? "fill" : "regular"} className="relative z-10" />
+              <span className="relative z-10">{it.label}</span>
             </button>
           )
         })}
       </nav>
-      <motion.div className="mt-auto px-3 py-3 rounded-xl bg-black/5 text-xs text-[var(--fg-muted)]">
+
+      <motion.div
+        whileHover={{ y: -2 }}
+        className="mt-auto px-3 py-3 rounded-xl bg-black/5 text-xs text-[var(--fg-muted)]"
+      >
         <p className="font-semibold text-[var(--fg)]">{empleados[0]?.nombre || "Dueño"}</p>
         <p>Dueño · {negocio.nombre}</p>
       </motion.div>

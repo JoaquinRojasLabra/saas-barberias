@@ -1,10 +1,10 @@
-import { motion } from "framer-motion"
+﻿import { motion } from "framer-motion"
 
 export default function SalesChart({ data }) {
   const max = Math.max(...data.map((d) => d.value), 1)
 
   return (
-    <div className="bg-[var(--bg-card)] border border-[var(--border)] rounded-2xl p-5 shadow-[var(--shadow)]">
+    <div className="surface surface-hover p-5">
       <p className="text-xs font-semibold text-[var(--fg-muted)] uppercase tracking-wider mb-4">Ventas de la semana</p>
       <div className="flex items-end justify-between gap-2 h-40">
         {data.map((d, i) => (

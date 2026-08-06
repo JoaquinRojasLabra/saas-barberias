@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react"
+﻿import { useState, useRef, useEffect } from "react"
 import { Plus, CheckCircle } from "@phosphor-icons/react"
 import { useStore } from "@/context/store"
 import { hoyKey, formatCLP, formatHora } from "@/lib/format"
@@ -37,7 +37,7 @@ export default function Ventas() {
       </div>
 
       <div className="flex items-center gap-3">
-        <div className="flex-1 bg-[var(--bg-card)] border border-[var(--border)] rounded-2xl px-4 py-3">
+        <div className="flex-1 surface px-4 py-3">
           <p className="text-xs text-[var(--fg-muted)]">Total hoy</p>
           <p className="text-2xl font-extrabold tracking-tight">{formatCLP(totalHoy)}</p>
         </div>
@@ -50,10 +50,10 @@ export default function Ventas() {
 
       <div className="space-y-2">
         {ordenadas.map((v) => (
-          <div key={v.id} className="flex items-center justify-between gap-3 border border-[var(--border)] rounded-xl px-4 py-3 bg-[var(--bg-card)]">
+          <div key={v.id} className="flex items-center justify-between gap-3 border border-[var(--border)] rounded-xl px-4 py-3 surface">
             <div>
               <p className="text-sm font-semibold">{getCliente(v.clienteId)?.nombre || "Cliente"}</p>
-              <p className="text-xs text-[var(--fg-muted)]">{getServicio(v.servicioId)?.nombre || "Servicio"} · {formatHora(v.fechaHora)}</p>
+              <p className="text-xs text-[var(--fg-muted)]">{getServicio(v.servicioId)?.nombre || "Servicio"} Â· {formatHora(v.fechaHora)}</p>
             </div>
             <p className="text-sm font-extrabold">{formatCLP(v.monto)}</p>
           </div>

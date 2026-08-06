@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react"
+﻿import { useState, useRef, useEffect } from "react"
 import { motion } from "framer-motion"
 import { X } from "@phosphor-icons/react"
 import { useStore } from "@/context/store"
@@ -37,7 +37,7 @@ export default function RegistroVenta({ onClose, onSave }) {
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4" onClick={onClose}>
-      <motion.div ref={ref} tabIndex={-1} role="dialog" aria-modal="true" aria-labelledby="venta-modal-title" initial={{ scale: 0.95, y: 10 }} animate={{ scale: 1, y: 0 }} onClick={(e) => e.stopPropagation()} className="w-full max-w-md bg-[var(--bg-card)] border border-[var(--border)] rounded-2xl p-6 shadow-2xl outline-none">
+      <motion.div ref={ref} tabIndex={-1} role="dialog" aria-modal="true" aria-labelledby="venta-modal-title" initial={{ scale: 0.95, y: 10 }} animate={{ scale: 1, y: 0 }} onClick={(e) => e.stopPropagation()} className="w-full max-w-md surface rounded-2xl p-6 shadow-2xl outline-none">
         <div className="flex items-center justify-between mb-4">
           <h2 id="venta-modal-title" className="text-lg font-bold">Registrar venta</h2>
           <button onClick={onClose} aria-label="Cerrar" className="text-[var(--fg-muted)] hover:text-[var(--fg)]"><X size={20} /></button>
@@ -45,23 +45,23 @@ export default function RegistroVenta({ onClose, onSave }) {
         <form onSubmit={submit} className="space-y-3">
           <label className="block">
             <span className="text-xs font-semibold text-[var(--fg-muted)]">Cliente</span>
-            <select value={clienteId} onChange={(e) => setClienteId(e.target.value)} required className="w-full mt-1 bg-[var(--bg)] border border-[var(--border)] rounded-lg px-3 py-2 text-sm">
+            <select value={clienteId} onChange={(e) => setClienteId(e.target.value)} required className="w-full mt-1 surface px-3 py-2 text-sm">
               {clientes.map((c) => <option key={c.id} value={c.id}>{c.nombre}</option>)}
             </select>
           </label>
           <label className="block">
             <span className="text-xs font-semibold text-[var(--fg-muted)]">Servicio</span>
-            <select value={servicioId} onChange={(e) => setServicioId(e.target.value)} required className="w-full mt-1 bg-[var(--bg)] border border-[var(--border)] rounded-lg px-3 py-2 text-sm">
-              {servicios.map((s) => <option key={s.id} value={s.id}>{s.nombre} — {formatCLP(s.precio)}</option>)}
+            <select value={servicioId} onChange={(e) => setServicioId(e.target.value)} required className="w-full mt-1 surface px-3 py-2 text-sm">
+              {servicios.map((s) => <option key={s.id} value={s.id}>{s.nombre} â€” {formatCLP(s.precio)}</option>)}
             </select>
           </label>
           <label className="block">
             <span className="text-xs font-semibold text-[var(--fg-muted)]">Fecha y hora</span>
-            <input type="datetime-local" value={fechaHora} onChange={(e) => setFechaHora(e.target.value)} className="w-full mt-1 bg-[var(--bg)] border border-[var(--border)] rounded-lg px-3 py-2 text-sm" />
+            <input type="datetime-local" value={fechaHora} onChange={(e) => setFechaHora(e.target.value)} className="w-full mt-1 surface px-3 py-2 text-sm" />
           </label>
           <label className="block">
             <span className="text-xs font-semibold text-[var(--fg-muted)]">Empleado</span>
-            <select value={empleadoId} onChange={(e) => setEmpleadoId(e.target.value)} className="w-full mt-1 bg-[var(--bg)] border border-[var(--border)] rounded-lg px-3 py-2 text-sm">
+            <select value={empleadoId} onChange={(e) => setEmpleadoId(e.target.value)} className="w-full mt-1 surface px-3 py-2 text-sm">
               {empleados.map((em) => <option key={em.id} value={em.id}>{em.nombre}</option>)}
             </select>
           </label>

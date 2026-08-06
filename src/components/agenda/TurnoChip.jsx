@@ -12,7 +12,7 @@ export default function TurnoChip({ turno, cliente, servicio, onEstado }) {
   const Icon = turno.estado === "cumplido" ? CheckCircle : turno.estado === "no-show" ? WarningCircle : turno.estado === "cancelado" ? XCircle : Clock
 
   return (
-    <div className={cn("flex items-center justify-between gap-3 border rounded-xl px-4 py-3 bg-[var(--bg-card)]", styles[turno.estado])}>
+    <div className={cn("flex items-center justify-between gap-3 border rounded-xl px-4 py-3 surface", styles[turno.estado])}>
       <div className="flex items-center gap-3 min-w-0">
         <Icon size={20} weight="fill" className="shrink-0" />
         <div className="min-w-0">

@@ -19,7 +19,7 @@ export default function Clientes() {
           const total = ventasCliente.reduce((s, v) => s + v.monto, 0)
           const turnosCliente = turnos.filter((t) => t.clienteId === c.id)
           return (
-            <button key={c.id} onClick={() => setFicha(c)} className="w-full text-left flex items-center gap-3 border border-[var(--border)] rounded-xl px-4 py-3 bg-[var(--bg-card)] hover:border-[var(--accent)] transition-colors">
+            <button key={c.id} onClick={() => setFicha(c)} className="w-full text-left flex items-center gap-3 border border-[var(--border)] rounded-xl px-4 py-3 surface hover:-translate-y-0.5 transition-all">
               <div className="flex items-center justify-center w-10 h-10 rounded-full bg-[var(--accent)] text-white font-bold shrink-0">
                 {c.nombre[0]}
               </div>

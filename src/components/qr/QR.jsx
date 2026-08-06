@@ -1,4 +1,4 @@
-import { motion } from "framer-motion"
+﻿import { motion } from "framer-motion"
 import { QRCodeSVG } from "qrcode.react"
 import { QrCode, Eye } from "@phosphor-icons/react"
 import { useStore } from "@/context/store"
@@ -12,17 +12,17 @@ export default function QR() {
   return (
     <div className="space-y-4">
       <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}>
-        <h1 className="text-xl font-extrabold tracking-tight">QR de la barbería</h1>
+        <h1 className="text-xl font-extrabold tracking-tight">QR de la barberÃ­a</h1>
         <p className="text-sm text-[var(--fg-muted)]">Pega este QR en tu vitrina para que tus clientes te vean al instante.</p>
       </motion.div>
 
-      <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="flex flex-col items-center gap-6 bg-[var(--bg-card)] border border-[var(--border)] rounded-2xl p-8">
+      <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="flex flex-col items-center gap-6 surface surface-hover rounded-2xl p-8">
         <div className="flex flex-col items-center gap-3">
           <div className="flex items-center justify-center w-16 h-16 rounded-2xl bg-[var(--accent)] text-white">
             <QrCode size={32} weight="duotone" />
           </div>
           <div className="text-center">
-            <p className="text-lg font-extrabold tracking-tight">{negocio?.nombre || "Mi barbería"}</p>
+            <p className="text-lg font-extrabold tracking-tight">{negocio?.nombre || "Mi barberÃ­a"}</p>
             <p className="text-xs text-[var(--fg-muted)]">{negocio?.direccion}</p>
           </div>
         </div>
@@ -32,14 +32,14 @@ export default function QR() {
         </div>
 
         <div className="w-full max-w-xs space-y-2">
-          <div className="flex items-center justify-between rounded-xl bg-[var(--bg)] border border-[var(--border)] px-4 py-3">
+          <div className="flex items-center justify-between surface px-4 py-3">
             <div>
               <p className="text-xs text-[var(--fg-muted)]">Escaneos</p>
               <p className="text-2xl font-extrabold">{qrStats.length}</p>
             </div>
             <Eye size={24} weight="duotone" className="text-[var(--accent)]" />
           </div>
-          <div className="flex items-center justify-between rounded-xl bg-[var(--bg)] border border-[var(--border)] px-4 py-3">
+          <div className="flex items-center justify-between surface px-4 py-3">
             <div>
               <p className="text-xs text-[var(--fg-muted)]">Ventas por QR</p>
               <p className="text-2xl font-extrabold">{formatCLP(total)}</p>

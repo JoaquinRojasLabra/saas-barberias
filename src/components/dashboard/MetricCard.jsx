@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react"
+﻿import { useEffect, useRef } from "react"
 import gsap from "gsap"
 import { motion } from "framer-motion"
 import { cn } from "@/lib/utils"
@@ -31,7 +31,7 @@ export default function MetricCard({ icon: Icon, label, value, sub, delay = 0 })
   return (
     <motion.div
       ref={ref}
-      className="bg-[var(--bg-card)] border border-[var(--border)] rounded-2xl p-5 shadow-[var(--shadow)]"
+      className="surface surface-hover p-5"
       whileHover={{ y: -4 }}
       transition={{ type: "spring", stiffness: 300, damping: 22 }}
     >
