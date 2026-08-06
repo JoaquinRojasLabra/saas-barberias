@@ -48,45 +48,45 @@
   --bg-pattern-size: 24px 24px;
 }
 
-/* ---- Midnight · azul profundo cian eléctrico */
-.theme-midnight {
+/* ---- Obsidian · vidrio oscuro translúcido */
+.theme-obsidian {
   color-scheme: dark;
   --font-sans: "Segoe UI", ui-sans-serif, system-ui, sans-serif;
   --font-display: var(--font-sans);
   --font-body: var(--font-sans);
 
-  --bg: #070b18;
-  --bg-card: #0f172e;
-  --fg: #e8ecff;
-  --fg-muted: #8b94c9;
-  --accent: #38e1ff;
-  --accent-2: #7c6bff;
-  --ring-track: #1d2642;
-  --border: #1d2642;
+  --bg: #0c0e1c;
+  --bg-card: rgba(24, 26, 46, 0.5);
+  --fg: #e9e9ff;
+  --fg-muted: #8b8fb8;
+  --accent: #8f7bff;
+  --accent-2: #38e1ff;
+  --ring-track: #2a2c4e;
+  --border: rgba(255, 255, 255, 0.12);
   --border-w: 1px;
-  --radius: 16px;
-  --shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
-  --shadow-lg: 0 26px 60px -20px rgba(0, 0, 0, 0.75);
-  --blur: 0;
+  --radius: 18px;
+  --shadow: 0 8px 24px -12px rgba(60, 40, 200, 0.5);
+  --shadow-lg: 0 24px 60px -18px rgba(60, 40, 200, 0.55);
+  --blur: 18px;
 
-  --surface-bg: #11172e;
-  --surface-blur: none;
-  --surface-blurw: 0;
-  --surface-saturate: 100%;
-  --surface-border: #243055;
-  --surface-radius: 16px;
-  --surface-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
-  --surface-inner: inset 0 1px 0 rgba(255, 255, 255, 0.07);
-  --surface-tint: 56, 225, 255;
+  --surface-bg: rgba(28, 28, 56, 0.45);
+  --surface-blur: blur(22px);
+  --surface-blurw: 22px;
+  --surface-saturate: 180%;
+  --surface-border: rgba(255, 255, 255, 0.16);
+  --surface-radius: 20px;
+  --surface-shadow: 0 8px 32px -12px rgba(60, 40, 200, 0.55);
+  --surface-inner: inset 0 1px 0 rgba(255, 255, 255, 0.14);
+  --surface-tint: 143, 123, 255;
 
-  --orb-1: rgba(56, 225, 255, 0.2);
-  --orb-2: rgba(124, 107, 255, 0.22);
-  --orb-3: rgba(40, 90, 255, 0.14);
+  --orb-1: rgba(150, 120, 255, 0.5);
+  --orb-2: rgba(56, 225, 255, 0.3);
+  --orb-3: rgba(200, 90, 255, 0.32);
 
-  --bg-pattern: radial-gradient(rgba(56, 225, 255, 0.12) 1px, transparent 1px);
-  --bg-pattern-size: 28px 28px;
-  --bg-pattern-opacity: 0.5;
-  --grain-opacity: 0.06;
+  --bg-pattern: radial-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+  --bg-pattern-size: 24px 24px;
+  --bg-pattern-opacity: 0.6;
+  --grain-opacity: 0.07;
 }
 
 /* ---- Emerald · bosque oscuro lima */
@@ -461,6 +461,8 @@ button:not([data-global]) {
   box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 18%, transparent), 0 0 16px color-mix(in srgb, var(--accent) 45%, transparent);
 }
 
-/* Chrome translúcido (activo curr. theme-glass */
-.theme-glass .app-chrome { backdrop-filter: blur(var(--blur)); }
-.theme-glass .app-chrome, .theme-glass input, .theme-glass select { -webkit-backdrop-filter: blur(var(--blur)); }
+/* Chrome translúcido (temas glass) */
+.theme-glass .app-chrome,
+.theme-obsidian .app-chrome { backdrop-filter: blur(var(--blur)); }
+.theme-glass .app-chrome, .theme-glass input, .theme-glass select,
+.theme-obsidian .app-chrome, .theme-obsidian input, .theme-obsidian select { -webkit-backdrop-filter: blur(var(--blur)); }

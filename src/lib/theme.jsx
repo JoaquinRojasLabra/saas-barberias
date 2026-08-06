@@ -8,7 +8,7 @@ export const THEMES = [
   { id: "brutal", label: "Brutal" },
   { id: "minimal", label: "Minimal" },
   { id: "fintech", label: "Fintech" },
-  { id: "midnight", label: "Midnight" },
+  { id: "obsidian", label: "Obsidian" },
   { id: "emerald", label: "Emerald" },
 ]
 
