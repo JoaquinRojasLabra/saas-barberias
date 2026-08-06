@@ -3,10 +3,14 @@ import { AnimatePresence, motion } from "framer-motion"
 import { StoreProvider, useStore } from "@/context/store"
 import { ToastProvider } from "@/lib/toast"
 import { AuthProvider, useAuth } from "@/lib/auth"
+import { useHashRoute, esPublica, slugDe } from "@/lib/router"
 import Background from "@/components/Background"
 import Sidebar from "@/components/Sidebar"
 import Topbar from "@/components/Topbar"
+import BottomNav from "@/components/BottomNav"
 import Login from "@/components/Login"
+import PublicPage from "@/pages/PublicPage"
+import PublicReserva from "@/pages/PublicReserva"
 import Dashboard from "@/components/dashboard/Dashboard"
 import Agenda from "@/components/agenda/Agenda"
 import Ventas from "@/components/ventas/Ventas"
@@ -29,9 +33,9 @@ function Shell() {
         <ParticleField />
       </Suspense>
       <Sidebar />
-      <div className="flex-1 flex flex-col overflow-y-auto">
+      <div className="flex-1 flex flex-col overflow-y-auto pb-20 lg:pb-0">
         <Topbar />
-        <main className="flex-1 p-6">
+        <main className="flex-1 p-4 sm:p-6">
           <AnimatePresence mode="wait">
             <motion.div
               key={view}
@@ -50,8 +54,22 @@ function Shell() {
           </AnimatePresence>
         </main>
       </div>
+      <BottomNav />
     </div>
   )
+}
+
+function AppRoot() {
+  const ruta = useHashRoute()
+
+  if (esPublica(ruta.path)) {
+    const slug = slugDe(ruta.path)
+    return ruta.path.endsWith("/reserva")
+      ? <PublicReserva slug={slug} />
+      : <PublicPage slug={slug} />
+  }
+
+  return <Shell />
 }
 
 export default function App() {
@@ -59,7 +77,7 @@ export default function App() {
     <StoreProvider>
       <AuthProvider>
         <ToastProvider>
-          <Shell />
+          <AppRoot />
         </ToastProvider>
       </AuthProvider>
     </StoreProvider>
