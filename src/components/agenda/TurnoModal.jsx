@@ -2,10 +2,12 @@
 import { motion } from "framer-motion"
 import { X } from "@phosphor-icons/react"
 import { useStore } from "@/context/store"
+import { useToast } from "@/lib/toast"
 import { hoyKey, formatCLP } from "@/lib/format"
 
 export default function TurnoModal({ onClose }) {
   const { clientes, servicios, empleados, addTurno } = useStore()
+  const push = useToast()
   const [clienteId, setClienteId] = useState(clientes[0]?.id || "")
   const [servicioId, setServicioId] = useState(servicios[0]?.id || "")
   const [fecha, setFecha] = useState(hoyKey())
@@ -30,6 +32,7 @@ export default function TurnoModal({ onClose }) {
   const submit = (e) => {
     e.preventDefault()
     addTurno({ clienteId, servicioId, fecha, hora, estado: "confirmado", empleadoId })
+    push("Turno agendado")
     onClose()
   }
 

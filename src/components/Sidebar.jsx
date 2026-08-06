@@ -1,5 +1,5 @@
 import { motion } from "framer-motion"
-import { ChartLineUp, CalendarCheck, Users, CurrencyCircleDollar, QrCode } from "@phosphor-icons/react"
+import { ChartLineUp, CalendarCheck, Users, CurrencyCircleDollar, QrCode, GearSix } from "@phosphor-icons/react"
 import { useStore } from "@/context/store"
 import { cn } from "@/lib/utils"
 
@@ -9,6 +9,7 @@ const items = [
   { id: "clientes", label: "Clientes", icon: Users },
   { id: "ventas", label: "Ventas", icon: CurrencyCircleDollar },
   { id: "qr", label: "Mi QR", icon: QrCode },
+  { id: "ajustes", label: "Ajustes", icon: GearSix },
 ]
 
 export default function Sidebar() {

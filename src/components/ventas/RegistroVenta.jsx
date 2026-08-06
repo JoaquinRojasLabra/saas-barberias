@@ -2,10 +2,12 @@
 import { motion } from "framer-motion"
 import { X } from "@phosphor-icons/react"
 import { useStore } from "@/context/store"
+import { useToast } from "@/lib/toast"
 import { hoyKey, formatCLP } from "@/lib/format"
 
 export default function RegistroVenta({ onClose, onSave }) {
   const { clientes, servicios, empleados, addVenta } = useStore()
+  const push = useToast()
   const [clienteId, setClienteId] = useState(clientes[0]?.id || "")
   const [servicioId, setServicioId] = useState(servicios[0]?.id || "")
   const [fechaHora, setFechaHora] = useState(`${hoyKey()}T10:30`)
@@ -32,6 +34,7 @@ export default function RegistroVenta({ onClose, onSave }) {
     e.preventDefault()
     addVenta({ clienteId, servicioId, monto: servicio?.precio || 0, fechaHora, empleadoId })
     onSave?.()
+    push("Venta registrada")
     onClose()
   }
 

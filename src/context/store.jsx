@@ -1,14 +1,44 @@
-import { createContext, useContext, useState } from "react"
-import { negocio, servicios, clientesMock, turnosMock, ventasMock, qrStatsMock, empleados } from "@/data/mock"
+import { createContext, useContext, useState, useEffect } from "react"
+import { negocio as negocioMock, servicios as serviciosMock, clientesMock, turnosMock, ventasMock, qrStatsMock, empleados } from "@/data/mock"
 
 const StoreContext = createContext()
 
+const KEY = "saas-barberias:v1"
+
+function load(key, fallback) {
+  try {
+    const raw = localStorage.getItem(`${KEY}:${key}`)
+    return raw ? JSON.parse(raw) : fallback
+  } catch {
+    return fallback
+  }
+}
+
 export function StoreProvider({ children }) {
-  const [turnos, setTurnos] = useState(turnosMock)
-  const [clientes, setClientes] = useState(clientesMock)
-  const [ventas, setVentas] = useState(ventasMock)
-  const [qrStats, setQrStats] = useState(qrStatsMock)
+  const [negocio, setNegocio] = useState(() => load("negocio", negocioMock))
+  const [servicios, setServicios] = useState(() => load("servicios", serviciosMock))
+  const [turnos, setTurnos] = useState(() => load("turnos", turnosMock))
+  const [clientes, setClientes] = useState(() => load("clientes", clientesMock))
+  const [ventas, setVentas] = useState(() => load("ventas", ventasMock))
+  const [qrStats, setQrStats] = useState(() => load("qrStats", qrStatsMock))
   const [view, setView] = useState("dashboard")
+
+  const persist = (key, value) => {
+    try {
+      localStorage.setItem(`${KEY}:${key}`, JSON.stringify(value))
+    } catch {
+      /* almacenamiento lleno o no disponible */
+    }
+  }
+
+  useEffect(() => persist("negocio", negocio), [negocio])
+  useEffect(() => persist("servicios", servicios), [servicios])
+  useEffect(() => persist("turnos", turnos), [turnos])
+  useEffect(() => persist("clientes", clientes), [clientes])
+  useEffect(() => persist("ventas", ventas), [ventas])
+  useEffect(() => persist("qrStats", qrStats), [qrStats])
+
+  const updateNegocio = (patch) => setNegocio((prev) => ({ ...prev, ...patch }))
 
   const addVenta = (venta) => {
     const v = { id: `v${Date.now()}`, ...venta }
@@ -24,11 +54,30 @@ export function StoreProvider({ children }) {
   const addQrScan = (fuente) =>
     setQrStats((prev) => [{ id: `q${Date.now()}`, fechaHora: new Date().toISOString(), fuente }, ...prev])
 
+  const addCliente = (cliente) => {
+    const c = { id: `c${Date.now()}`, visitas: 0, ...cliente }
+    setClientes((prev) => [c, ...prev])
+    return c
+  }
+
+  const addServicio = (servicio) => {
+    const s = { id: `s${Date.now()}`, ...servicio }
+    setServicios((prev) => [...prev, s])
+    return s
+  }
+
+  const updateServicio = (id, patch) =>
+    setServicios((prev) => prev.map((s) => (s.id === id ? { ...s, ...patch } : s)))
+
+  const removeServicio = (id) =>
+    setServicios((prev) => prev.filter((s) => s.id !== id))
+
   const value = {
     negocio, servicios, empleados,
     turnos, clientes, ventas, qrStats,
     view, setView,
-    addVenta, addTurno, setTurnoEstado, addQrScan,
+    updateNegocio, addVenta, addTurno, setTurnoEstado, addQrScan,
+    addCliente, addServicio, updateServicio, removeServicio,
   }
 
   return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>

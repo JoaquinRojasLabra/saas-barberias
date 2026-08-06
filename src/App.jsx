@@ -1,6 +1,7 @@
 import { lazy, Suspense } from "react"
 import { AnimatePresence, motion } from "framer-motion"
 import { StoreProvider, useStore } from "@/context/store"
+import { ToastProvider } from "@/lib/toast"
 import Background from "@/components/Background"
 import Sidebar from "@/components/Sidebar"
 import Topbar from "@/components/Topbar"
@@ -9,6 +10,7 @@ import Agenda from "@/components/agenda/Agenda"
 import Ventas from "@/components/ventas/Ventas"
 import Clientes from "@/components/clientes/Clientes"
 import QR from "@/components/qr/QR"
+import Ajustes from "@/components/ajustes/Ajustes"
 
 const ParticleField = lazy(() => import("@/components/ParticleField"))
 
@@ -38,6 +40,7 @@ function Shell() {
               {view === "clientes" && <Clientes />}
               {view === "ventas" && <Ventas />}
               {view === "qr" && <QR />}
+              {view === "ajustes" && <Ajustes />}
             </motion.div>
           </AnimatePresence>
         </main>
@@ -49,7 +52,9 @@ function Shell() {
 export default function App() {
   return (
     <StoreProvider>
-      <Shell />
+      <ToastProvider>
+        <Shell />
+      </ToastProvider>
     </StoreProvider>
   )
 }

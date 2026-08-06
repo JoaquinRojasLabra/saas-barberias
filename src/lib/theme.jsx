@@ -15,12 +15,23 @@ export const THEMES = [
 const ThemeContext = createContext()
 
 export function ThemeProvider({ children }) {
-  const [theme, setTheme] = useState("elegante")
+  const [theme, setTheme] = useState(() => {
+    try {
+      return localStorage.getItem("saas-barberias:theme") || "elegante"
+    } catch {
+      return "elegante"
+    }
+  })
 
   useEffect(() => {
     const root = document.documentElement
     THEMES.forEach((t) => root.classList.remove(`theme-${t.id}`))
     if (theme !== "elegante") root.classList.add(`theme-${theme}`)
+    try {
+      localStorage.setItem("saas-barberias:theme", theme)
+    } catch {
+      /* ignorar */
+    }
   }, [theme])
 
   return (

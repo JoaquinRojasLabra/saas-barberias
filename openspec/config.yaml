@@ -1,0 +1,23 @@
+schema: spec-driven
+
+context: |
+  SaaS multi-tenant de administración para barberías. La app se vende a muchas
+  barberías; cada una personaliza su negocio (nombre, logo, colores, servicios,
+  horario) y el panel usa esos datos.
+
+  Stack: Vite 8 (rolldown) + React 19 + Tailwind CSS v4 + Framer Motion.
+  Iconos: @phosphor-icons/react. Alias "@" -> "src/". Deploy: Vercel.
+  Lint: `npm run lint` (oxlint). Windows PowerShell (no usar &&).
+  Datos actuales: mock en memoria (context/store.jsx -> data/mock).
+
+  Sistema de temas: 9 themes regulables por CSS variables en src/index.css
+  (selector `.theme-{id}` en <html>); superfície `.surface`, navegación viva en
+  Sidebar con layoutId. El estilo visual es un punto de venta: cada tema tiene
+  textura de superficie propia (glass, clay, brutal, minimal, barbero...).
+
+rules:
+  proposal:
+    - Dejar claro qué hace el bloque vendible para una barbería real
+    - Incluir "Non-goals" (qué no se hace aún)
+  tasks:
+    - Tareas pequeñas y verificables con lint/build
