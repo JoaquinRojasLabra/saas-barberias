@@ -1,3 +1,4 @@
+import { useEffect } from "react"
 import { motion } from "framer-motion"
 import { CalendarCheck, Phone, MapPin, Clock, ArrowRight, Scissors } from "@phosphor-icons/react"
 import { useStore } from "@/context/store"
@@ -8,7 +9,11 @@ import Logo3D from "@/components/public/Logo3D"
 
 export default function PublicPage() {
   const { negocio, servicios, empleados } = useStore()
-  const { theme } = useTheme()
+  const { theme, setTheme } = useTheme()
+
+  useEffect(() => {
+    if (negocio.tema) setTheme(negocio.tema)
+  }, [negocio.tema, setTheme])
 
   return (
     <div key={theme} className="min-h-screen bg-[var(--bg)] text-[var(--fg)] relative overflow-hidden">

@@ -1,7 +1,8 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { motion } from "framer-motion"
 import { ArrowLeft, ArrowRight, Check, Clock, Scissors } from "@phosphor-icons/react"
 import { useStore } from "@/context/store"
+import { useTheme } from "@/lib/theme"
 import { useToast } from "@/lib/toast"
 import { formatCLP, hoyKey } from "@/lib/format"
 import { navegarA, slugDe } from "@/lib/router"
@@ -10,7 +11,8 @@ const pasosLabel = ["Servicio", "Horario", "Tus datos", "Confirmar"]
 const MAX = pasosLabel.length - 1
 
 export default function PublicReserva() {
-  const { servicios, empleados, clientes, turnos, slotsHorario, tomarCita, addCliente } = useStore()
+  const { negocio, servicios, empleados, clientes, turnos, slotsHorario, tomarCita, addCliente } = useStore()
+  const { setTheme } = useTheme()
   const push = useToast()
   const [paso, setPaso] = useState(0)
   const [servicioId, setServicioId] = useState("")
@@ -42,6 +44,10 @@ export default function PublicReserva() {
     navegarA(`/c/${slug}`)
   }
 
+  useEffect(() => {
+    if (negocio.tema) setTheme(negocio.tema)
+  }, [negocio.tema, setTheme])
+
   const input = "w-full surface px-3 py-2 text-sm"
 
   const selClase = "bg-gradient-to-br from-[var(--accent)] to-[var(--accent-2)] text-white border-transparent shadow-[var(--shadow-lg)]"
@@ -68,7 +74,7 @@ export default function PublicReserva() {
       </div>
 
       <motion.section
-        key={`${paso}-${servicioId}-${empleadoId}-${fecha}`}
+        key={paso}
         initial={{ opacity: 0, x: 28 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
