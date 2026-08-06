@@ -15,9 +15,9 @@ export default function Dashboard() {
     const ventasHoy = ventas.filter((v) => v.fechaHora.startsWith(hoy))
     const totalHoy = ventasHoy.reduce((acc, v) => acc + v.monto, 0)
     const turnosHoy = turnos.filter((t) => t.fecha === hoy)
-    const noShows = turnosHoy.filter((t) => t.estado === "no-show").length
+    const noLlego = turnosHoy.filter((t) => t.estado === "no-llego").length
     const metaDia = 60000
-    return { totalHoy, noShows, turnosHoy: turnosHoy.length, escaneos: qrStats.length, metaDia }
+    return { totalHoy, noLlego, turnosHoy: turnosHoy.length, escaneos: qrStats.length, metaDia }
   }, [ventas, turnos, qrStats, hoy])
 
   const semana = [
@@ -34,7 +34,7 @@ export default function Dashboard() {
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
         <MetricCard icon={CurrencyCircleDollar} label="Ventas hoy" value={<CountUp n={resumen.totalHoy} format={(v) => formatCLP(v)} />} sub={{ text: `Meta ${formatCLP(resumen.metaDia)}` }} delay={0} />
         <MetricCard icon={CalendarCheck} label="Turnos hoy" value={<CountUp n={resumen.turnosHoy} />} sub={{ text: "agendados" }} delay={0.1} />
-        <MetricCard icon={UserMinus} label="No-shows" value={<CountUp n={resumen.noShows} />} sub={{ text: resumen.noShows > 0 ? "revisa agenda" : "todo perfecto", className: resumen.noShows > 0 ? "text-red-500" : "text-green-600" }} delay={0.2} />
+        <MetricCard icon={UserMinus} label="No llegó" value={<CountUp n={resumen.noLlego} />} sub={{ text: resumen.noLlego > 0 ? "revisa agenda" : "todo perfecto", className: resumen.noLlego > 0 ? "text-red-500" : "text-green-600" }} delay={0.2} />
         <MetricCard icon={Users} label="Escaneos QR" value={<CountUp n={resumen.escaneos} />} sub={{ text: "esta semana" }} delay={0.3} />
       </div>
 
