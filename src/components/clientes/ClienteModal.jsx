@@ -46,8 +46,8 @@ export default function ClienteModal({ onClose, cliente }) {
   const input = "w-full mt-1 surface px-3 py-2 text-sm"
 
   return (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4" onClick={onClose}>
-      <motion.div ref={ref} tabIndex={-1} role="dialog" aria-modal="true" aria-labelledby="cliente-modal-title" initial={{ scale: 0.95, y: 10 }} animate={{ scale: 1, y: 0 }} onClick={(e) => e.stopPropagation()} className="w-full max-w-md surface rounded-2xl p-6 shadow-2xl outline-none">
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4" onClick={onClose}>
+      <motion.div ref={ref} tabIndex={-1} role="dialog" aria-modal="true" aria-labelledby="cliente-modal-title" initial={{ scale: 0.95, y: 10 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.95, y: 10, opacity: 0 }} transition={{ type: "spring", stiffness: 380, damping: 28 }} onClick={(e) => e.stopPropagation()} className="w-full max-w-md surface rounded-2xl p-6 shadow-2xl outline-none">
         <div className="flex items-center justify-between mb-4">
           <h2 id="cliente-modal-title" className="text-lg font-bold">{editing ? "Editar cliente" : "Nuevo cliente"}</h2>
           <button onClick={onClose} aria-label="Cerrar" className="text-[var(--fg-muted)] hover:text-[var(--fg)]"><X size={20} /></button>
