@@ -27,7 +27,7 @@ export default function Topbar() {
           <span className="text-xs text-[var(--fg-muted)]">Estilo del panel</span>
           <select
             value={theme}
-            onChange={cambiarTema}
+            onChange={(e) => cambiarTema(e.target.value)}
             className="surface px-3 py-1.5 text-sm font-medium outline-none cursor-pointer"
           >
             {THEMES.map((t) => (

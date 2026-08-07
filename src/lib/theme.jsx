@@ -15,19 +15,26 @@ export const THEMES = [
 
 const ThemeContext = createContext()
 
+const esTemaValido = (t) =>
+  t && typeof t === "string" && THEMES.some((x) => x.id === t)
+
 export function ThemeProvider({ children }) {
   const { negocio, updateNegocio } = useStore()
   const [theme, setThemeState] = useState(() => {
+    let inicial
     try {
-      return localStorage.getItem("saas-barberias:theme") || negocio?.tema || "elegante"
+      inicial = localStorage.getItem("saas-barberias:theme")
     } catch {
-      return negocio?.tema || "elegante"
+      inicial = null
     }
+    if (!esTemaValido(inicial)) inicial = negocio?.tema
+    return esTemaValido(inicial) ? inicial : "elegante"
   })
   const themeRef = useRef(theme)
   themeRef.current = theme
 
   const setTheme = useCallback((t) => {
+    if (!esTemaValido(t)) return
     if (themeRef.current === t) return
     updateNegocio({ tema: t })
     setThemeState(t)
