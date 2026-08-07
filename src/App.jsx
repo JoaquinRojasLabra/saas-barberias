@@ -1,6 +1,7 @@
 import { lazy, Suspense } from "react"
 import { AnimatePresence, motion } from "framer-motion"
 import { StoreProvider, useStore } from "@/context/store"
+import { ThemeProvider } from "@/lib/theme"
 import { ToastProvider } from "@/lib/toast"
 import { AuthProvider, useAuth } from "@/lib/auth"
 import { useHashRoute, esPublica, slugDe } from "@/lib/router"
@@ -75,11 +76,13 @@ function AppRoot() {
 export default function App() {
   return (
     <StoreProvider>
-      <AuthProvider>
-        <ToastProvider>
-          <AppRoot />
-        </ToastProvider>
-      </AuthProvider>
+      <ThemeProvider>
+        <AuthProvider>
+          <ToastProvider>
+            <AppRoot />
+          </ToastProvider>
+        </AuthProvider>
+      </ThemeProvider>
     </StoreProvider>
   )
 }

@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useEffect } from "react"
+import { useStore } from "@/context/store"
 
 export const THEMES = [
   { id: "elegante", label: "Elegante" },
@@ -15,13 +16,19 @@ export const THEMES = [
 const ThemeContext = createContext()
 
 export function ThemeProvider({ children }) {
-  const [theme, setTheme] = useState(() => {
+  const { negocio, updateNegocio } = useStore()
+  const [theme, setThemeState] = useState(() => {
     try {
-      return localStorage.getItem("saas-barberias:theme") || "elegante"
+      return localStorage.getItem("saas-barberias:theme") || negocio?.tema || "elegante"
     } catch {
-      return "elegante"
+      return negocio?.tema || "elegante"
     }
   })
+
+  const setTheme = (t) => {
+    setThemeState(t)
+    updateNegocio({ tema: t })
+  }
 
   useEffect(() => {
     const root = document.documentElement

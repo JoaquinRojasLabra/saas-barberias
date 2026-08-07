@@ -124,7 +124,7 @@ export default function Ajustes() {
               return (
                 <button
                   key={t.id}
-                  onClick={() => { setTheme(t.id); updateNegocio({ tema: t.id }) }}
+                  onClick={() => setTheme(t.id)}
                   className={`surface-hover flex items-center justify-between px-4 py-3 rounded-xl border text-sm font-medium transition-all ${
                     active ? "border-[var(--accent)] text-[var(--fg)]" : "text-[var(--fg-muted)]"
                   }`}
