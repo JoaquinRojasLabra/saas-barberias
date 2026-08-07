@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect, useCallback, useMemo } from "react"
+import { createContext, useContext, useState, useEffect, useCallback, useMemo, useRef } from "react"
 import { useStore } from "@/context/store"
 
 export const THEMES = [
@@ -24,10 +24,13 @@ export function ThemeProvider({ children }) {
       return negocio?.tema || "elegante"
     }
   })
+  const themeRef = useRef(theme)
+  themeRef.current = theme
 
   const setTheme = useCallback((t) => {
-    setThemeState(t)
+    if (themeRef.current === t) return
     updateNegocio({ tema: t })
+    setThemeState(t)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
