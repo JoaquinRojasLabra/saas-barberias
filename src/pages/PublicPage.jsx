@@ -1,6 +1,6 @@
 import { useEffect } from "react"
 import { motion } from "framer-motion"
-import { CalendarCheck, Phone, MapPin, Clock, ArrowRight, Scissors, ScissorsBold, PaintBrush, Droplet, Sparkle, UserFocus } from "@phosphor-icons/react"
+import { CalendarCheck, Phone, MapPin, Clock, ArrowRight, Scissors, PaintBrush, Drop, Sparkle, UserFocus } from "@phosphor-icons/react"
 import { useStore } from "@/context/store"
 import { useTheme } from "@/lib/theme"
 import { formatCLP } from "@/lib/format"
@@ -11,8 +11,8 @@ import Background from "@/components/Background"
 const iconoDeServicio = (nombre) => {
   const n = (nombre || "").toLowerCase()
   if (n.includes("tinte") || n.includes("color") || n.includes("luz")) return PaintBrush
-  if (n.includes("barba")) return ScissorsBold
-  if (n.includes("hidrat") || n.includes("tratamiento")) return Droplet
+  if (n.includes("barba")) return Scissors
+  if (n.includes("hidrat") || n.includes("tratamiento")) return Drop
   if (n.includes("afeit")) return UserFocus
   if (n.includes("ceja") || n.includes("perfil")) return Sparkle
   return Scissors
