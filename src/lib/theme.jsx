@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect } from "react"
+import { createContext, useContext, useState, useEffect, useCallback, useMemo } from "react"
 import { useStore } from "@/context/store"
 
 export const THEMES = [
@@ -25,10 +25,11 @@ export function ThemeProvider({ children }) {
     }
   })
 
-  const setTheme = (t) => {
+  const setTheme = useCallback((t) => {
     setThemeState(t)
     updateNegocio({ tema: t })
-  }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   useEffect(() => {
     const root = document.documentElement
@@ -41,8 +42,10 @@ export function ThemeProvider({ children }) {
     }
   }, [theme])
 
+  const value = useMemo(() => ({ theme, setTheme, THEMES }), [theme, setTheme])
+
   return (
-    <ThemeContext.Provider value={{ theme, setTheme, THEMES }}>
+    <ThemeContext.Provider value={value}>
       {children}
     </ThemeContext.Provider>
   )
