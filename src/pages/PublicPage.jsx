@@ -6,6 +6,7 @@ import { useTheme } from "@/lib/theme"
 import { formatCLP } from "@/lib/format"
 import { navegarA, leerRuta, parametrosDe } from "@/lib/router"
 import Logo3D from "@/components/public/Logo3D"
+import Background from "@/components/Background"
 
 export default function PublicPage() {
   const { negocio, servicios, empleados } = useStore()
@@ -18,8 +19,9 @@ export default function PublicPage() {
   }, [negocio.tema, setTheme])
 
   return (
-    <div key={theme} className="min-h-screen bg-[var(--bg)] text-[var(--fg)] relative overflow-hidden">
-      <div className="max-w-5xl mx-auto px-6 py-12 sm:py-16">
+    <div key={theme} className="min-h-screen text-[var(--fg)] relative overflow-hidden">
+      <Background />
+      <div className="max-w-5xl mx-auto px-6 py-12 sm:py-16 relative z-10">
         <motion.header initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="flex flex-col items-center text-center gap-4">
           <Logo3D />
           <p className="uppercase tracking-[0.2em] text-xs text-[var(--fg-muted)]">Tu barbería</p>

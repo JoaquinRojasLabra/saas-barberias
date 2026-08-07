@@ -6,6 +6,7 @@ import { useTheme } from "@/lib/theme"
 import { useToast } from "@/lib/toast"
 import { formatCLP, hoyKey } from "@/lib/format"
 import { navegarA, slugDe, leerRuta, parametrosDe } from "@/lib/router"
+import Background from "@/components/Background"
 
 const pasosLabel = ["Servicio", "Horario", "Tus datos", "Confirmar"]
 const MAX = pasosLabel.length - 1
@@ -56,7 +57,8 @@ export default function PublicReserva() {
   const noSelClase = "bg-[var(--bg-card)] text-[var(--fg)] hover:bg-[var(--accent)]/10"
 
   return (
-    <div className="min-h-screen bg-[var(--bg)] text-[var(--fg)] px-6 py-8 max-w-xl mx-auto">
+    <div className="min-h-screen text-[var(--fg)] px-6 py-8 max-w-xl mx-auto relative">
+      <Background />
       <button onClick={() => navegarA(`/c/${slug}`)} className="inline-flex items-center gap-1 text-xs text-[var(--fg-muted)] hover:text-[var(--fg)]">
         <ArrowLeft size={14} /> Volver a la barbería
       </button>
