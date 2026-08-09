@@ -5,18 +5,18 @@ import { useAuth } from "@/lib/auth"
 import { cn } from "@/lib/utils"
 import { navegarA } from "@/lib/router"
 
-const items = [
-  { id: "dashboard", label: "Dashboard", icon: ChartLineUp },
-  { id: "agenda", label: "Agenda", icon: CalendarCheck },
-  { id: "clientes", label: "Clientes", icon: Users },
-  { id: "ventas", label: "Ventas", icon: CurrencyCircleDollar },
-  { id: "qr", label: "Mi QR", icon: QrCode },
-  { id: "ajustes", label: "Ajustes", icon: GearSix },
-]
-
 export default function Sidebar() {
-  const { view, setView, negocio, empleados } = useStore()
+  const { view, setView, negocio, esBarbero, session } = useStore()
   const { logout } = useAuth()
+
+  const items = [
+    { id: "dashboard", label: "Dashboard", icon: ChartLineUp, barbero: false },
+    { id: "agenda", label: "Agenda", icon: CalendarCheck, barbero: true },
+    { id: "clientes", label: "Clientes", icon: Users, barbero: true },
+    { id: "ventas", label: "Ventas", icon: CurrencyCircleDollar, barbero: true },
+    { id: "qr", label: "Mi QR", icon: QrCode, barbero: true },
+    { id: "ajustes", label: "Ajustes", icon: GearSix, barbero: true },
+  ].filter((it) => (esBarbero ? it.barbero : true))
 
   return (
     <aside className="app-chrome hidden lg:flex w-60 shrink-0 h-screen sticky top-0 flex-col gap-6 px-4 py-6 bg-[var(--bg-card)] border-r border-[var(--border)]">
@@ -28,8 +28,8 @@ export default function Sidebar() {
           className="brand-orb shrink-0"
         />
         <div>
-          <p className="text-sm font-extrabold tracking-tight">{negocio.nombre}</p>
-          <p className="text-xs text-[var(--fg-muted)]">{negocio.direccion}</p>
+          <p className="text-sm font-extrabold tracking-tight">{negocio?.nombre}</p>
+          <p className="text-xs text-[var(--fg-muted)]">{negocio?.direccion}</p>
         </div>
       </div>
 
@@ -60,19 +60,21 @@ export default function Sidebar() {
         })}
       </nav>
 
-      <button
-        onClick={() => navegarA(`/c/${negocio.slug}`)}
-        className="flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-medium text-[var(--fg-muted)] hover:text-[var(--fg)] transition-colors"
-      >
-        <Globe size={20} /> Ver página pública
-      </button>
+      {!esBarbero && (
+        <button
+          onClick={() => navegarA(`/c/${negocio?.slug}`)}
+          className="flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-medium text-[var(--fg-muted)] hover:text-[var(--fg)] transition-colors"
+        >
+          <Globe size={20} /> Ver página pública
+        </button>
+      )}
 
       <motion.div
         whileHover={{ y: -2 }}
         className="mt-auto px-3 py-3 rounded-xl bg-black/5 text-xs text-[var(--fg-muted)]"
       >
-        <p className="font-semibold text-[var(--fg)]">{empleados[0]?.nombre || "Dueño"}</p>
-        <p>Dueño · {negocio.nombre}</p>
+        <p className="font-semibold text-[var(--fg)]">{nombreLabel(session, esBarbero)}</p>
+        <p>{esBarbero ? "Perfil de barbero" : `Dueño · ${negocio?.nombre}`}</p>
         <button
           onClick={logout}
           className="mt-2 flex items-center gap-1.5 text-xs font-medium text-[var(--fg-muted)] hover:text-red-500 transition-colors"
@@ -82,4 +84,9 @@ export default function Sidebar() {
       </motion.div>
     </aside>
   )
+}
+
+function nombreLabel(session, esBarbero) {
+  if (esBarbero) return session?.usuarioId ? "Barbero" : "Barbero"
+  return "Dueño"
 }

@@ -7,12 +7,28 @@ import ProgressRing from "./ProgressRing"
 import SalesChart from "./SalesChart"
 import CountUp from "@/components/CountUp"
 
+function diasSemana(hoy) {
+  const f = new Date(hoy + "T12:00:00")
+  const dia = (f.getDay() + 6) % 7 // lunes=0
+  const lunes = new Date(f)
+  lunes.setDate(f.getDate() - dia)
+  return Array.from({ length: 7 }, (_, i) => {
+    const d = new Date(lunes)
+    d.setDate(lunes.getDate() + i)
+    return {
+      key: d.toISOString().slice(0, 10),
+      nombre: ["L", "M", "X", "J", "V", "S", "D"][i],
+    }
+  })
+}
+
 export default function Dashboard() {
-  const { ventas, turnos, qrStats } = useStore()
+  const { scope, qrStats, esBarbero, session, empleados } = useStore()
+  const { turnos, ventas } = scope
   const hoy = hoyKey()
 
   const resumen = useMemo(() => {
-    const ventasHoy = ventas.filter((v) => v.fechaHora.startsWith(hoy))
+    const ventasHoy = ventas.filter((v) => v.fechaHora?.startsWith(hoy))
     const totalHoy = ventasHoy.reduce((acc, v) => acc + v.monto, 0)
     const turnosHoy = turnos.filter((t) => t.fecha === hoy)
     const noLlego = turnosHoy.filter((t) => t.estado === "no-llego").length
@@ -20,17 +36,29 @@ export default function Dashboard() {
     return { totalHoy, noLlego, turnosHoy: turnosHoy.length, escaneos: qrStats.length, metaDia }
   }, [ventas, turnos, qrStats, hoy])
 
-  const semana = [
-    { day: "L", value: 42000 },
-    { day: "M", value: 51000 },
-    { day: "X", value: 48000 },
-    { day: "J", value: 65000 },
-    { day: "V", value: 78000 },
-    { day: "S", value: 92000 },
-  ]
+  const semana = useMemo(() => {
+    const dias = diasSemana(hoy)
+    return dias.map((d) => ({
+      day: d.nombre,
+      value: ventas
+        .filter((v) => v.fechaHora?.startsWith(d.key))
+        .reduce((acc, v) => acc + v.monto, 0),
+    }))
+  }, [ventas, hoy])
+
+  const barberoNombre = empleados.find((e) => e.id === session?.barberoId)?.nombre || "barbero"
 
   return (
     <div className="space-y-6">
+      <div className="flex items-center gap-2 flex-wrap">
+        <h1 className="text-xl font-extrabold tracking-tight">
+          {esBarbero ? `Hola, ${barberoNombre}` : "Panel del negocio"}
+        </h1>
+        <span className="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-lg bg-[var(--accent)]/10 text-[var(--accent)]">
+          {esBarbero ? "Tu actividad" : "Todo el local"}
+        </span>
+      </div>
+
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
         <MetricCard icon={CurrencyCircleDollar} label="Ventas hoy" value={<CountUp n={resumen.totalHoy} format={(v) => formatCLP(v)} />} sub={{ text: `Meta ${formatCLP(resumen.metaDia)}` }} delay={0} />
         <MetricCard icon={CalendarCheck} label="Turnos hoy" value={<CountUp n={resumen.turnosHoy} />} sub={{ text: "agendados" }} delay={0.1} />

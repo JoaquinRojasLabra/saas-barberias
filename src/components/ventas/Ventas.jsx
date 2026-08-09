@@ -5,7 +5,8 @@ import { hoyKey, formatCLP, formatHora } from "@/lib/format"
 import RegistroVenta from "./RegistroVenta"
 
 export default function Ventas() {
-  const { ventas, clientes, servicios } = useStore()
+  const { ventas: ventasRaw, clientes, servicios, scope, esBarbero, session, marcarPagadaVenta } = useStore()
+  const ventas = esBarbero ? scope.ventas : ventasRaw
   const [showModal, setShowModal] = useState(false)
   const [savedFlash, setSavedFlash] = useState(false)
   const timerRef = useRef(null)
@@ -57,14 +58,26 @@ export default function Ventas() {
               <span className="mt-1 inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-lg bg-[var(--accent)]/10 text-[var(--accent)]">
                 {v.metodo || "Efectivo"}
               </span>
+              {v.pendientePago && (
+                <span className="mt-1 ml-1 inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-lg bg-amber-500/15 text-amber-600">
+                  Pendiente de pago
+                </span>
+              )}
             </div>
-            <p className="text-sm font-extrabold">{formatCLP(v.monto)}</p>
+            <div className="flex flex-col items-end gap-1">
+              <p className="text-sm font-extrabold">{formatCLP(v.monto)}</p>
+              {v.pendientePago && (
+                <button onClick={() => marcarPagadaVenta(v.id)} className="text-[11px] font-semibold text-[var(--accent)] hover:underline">
+                  Confirmar pago
+                </button>
+              )}
+            </div>
           </div>
         ))}
         {ordenadas.length === 0 && <p className="text-sm text-[var(--fg-muted)]">No hay ventas registradas.</p>}
       </div>
 
-      {showModal && <RegistroVenta onClose={() => setShowModal(false)} onSave={flash} />}
+      {showModal && <RegistroVenta onClose={() => setShowModal(false)} onSave={flash} empleadoPorDefecto={esBarbero ? session?.barberoId : undefined} />}
     </div>
   )
 }

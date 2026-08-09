@@ -5,7 +5,7 @@ import { useStore } from "@/context/store"
 import { useToast } from "@/lib/toast"
 
 export default function ClienteModal({ onClose, cliente }) {
-  const { addCliente, updateCliente } = useStore()
+  const { addCliente, updateCliente, esBarbero, session } = useStore()
   const push = useToast()
   const editing = Boolean(cliente)
 
@@ -37,7 +37,7 @@ export default function ClienteModal({ onClose, cliente }) {
       updateCliente(cliente.id, form)
       push("Cliente actualizado")
     } else {
-      addCliente(form)
+      addCliente({ ...form, empleadoId: esBarbero ? session?.barberoId : undefined })
       push("Cliente registrado")
     }
     onClose()

@@ -5,7 +5,8 @@ import TurnoChip from "./TurnoChip"
 import TurnoModal from "./TurnoModal"
 
 export default function Agenda() {
-  const { turnos, clientes, servicios, setTurnoEstado } = useStore()
+  const { turnos: turnosRaw, clientes, servicios, setTurnoEstado, scope, esBarbero, session } = useStore()
+  const turnos = esBarbero ? scope.turnos : turnosRaw
   const [showModal, setShowModal] = useState(false)
 
   const getCliente = (id) => clientes.find((c) => c.id === id)
@@ -27,7 +28,7 @@ export default function Agenda() {
         ))}
         {ordenados.length === 0 && <p className="text-sm text-[var(--fg-muted)]">No hay turnos agendados.</p>}
       </div>
-      {showModal && <TurnoModal onClose={() => setShowModal(false)} />}
+      {showModal && <TurnoModal onClose={() => setShowModal(false)} empleadoPorDefecto={esBarbero ? session.barberoId : undefined} />}
     </div>
   )
 }

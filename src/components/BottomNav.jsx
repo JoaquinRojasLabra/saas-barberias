@@ -2,17 +2,17 @@ import { ChartLineUp, CalendarCheck, Users, CurrencyCircleDollar, QrCode, GearSi
 import { useStore } from "@/context/store"
 import { cn } from "@/lib/utils"
 
-const items = [
-  { id: "dashboard", icon: ChartLineUp, label: "Inicio" },
-  { id: "agenda", icon: CalendarCheck, label: "Agenda" },
-  { id: "ventas", icon: CurrencyCircleDollar, label: "Ventas" },
-  { id: "clientes", icon: Users, label: "Clientes" },
-  { id: "qr", icon: QrCode, label: "QR" },
-  { id: "ajustes", icon: GearSix, label: "Más" },
-]
-
 export default function BottomNav() {
-  const { view, setView } = useStore()
+  const { view, setView, esBarbero } = useStore()
+
+  const items = [
+    { id: "dashboard", icon: ChartLineUp, label: "Inicio", barbero: false },
+    { id: "agenda", icon: CalendarCheck, label: "Agenda", barbero: true },
+    { id: "ventas", icon: CurrencyCircleDollar, label: "Ventas", barbero: true },
+    { id: "clientes", icon: Users, label: "Clientes", barbero: true },
+    { id: "qr", icon: QrCode, label: "QR", barbero: true },
+    { id: "ajustes", icon: GearSix, label: "Más", barbero: true },
+  ].filter((it) => (esBarbero ? it.barbero : true))
 
   return (
     <nav className="lg:hidden fixed bottom-0 inset-x-0 z-40 border-t border-[var(--border)] bg-[var(--bg-card)]/95 backdrop-blur-md pb-[env(safe-area-inset-bottom)]">

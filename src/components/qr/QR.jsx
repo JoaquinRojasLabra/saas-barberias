@@ -14,7 +14,7 @@ export default function QR() {
   return (
     <div className="space-y-4">
       <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}>
-        <h1 className="text-xl font-extrabold tracking-tight">QR de la barberÃ­a</h1>
+        <h1 className="text-xl font-extrabold tracking-tight">QR de la barbería</h1>
         <p className="text-sm text-[var(--fg-muted)]">Pega este QR en tu vitrina para que tus clientes te vean al instante.</p>
       </motion.div>
 
@@ -24,7 +24,7 @@ export default function QR() {
             <QrCode size={32} weight="duotone" />
           </div>
           <div className="text-center">
-            <p className="text-lg font-extrabold tracking-tight">{negocio?.nombre || "Mi barberÃ­a"}</p>
+            <p className="text-lg font-extrabold tracking-tight">{negocio?.nombre || "Mi barbería"}</p>
             <p className="text-xs text-[var(--fg-muted)]">{negocio?.direccion}</p>
           </div>
         </div>

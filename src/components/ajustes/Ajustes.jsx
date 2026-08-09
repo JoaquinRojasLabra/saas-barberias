@@ -1,41 +1,27 @@
 import { useState } from "react"
-import { Plus, Trash, PencilSimple, Check, X, Storefront, Palette, Scissors, Clock, Key, ChatTeardrop, ArrowSquareOut } from "@phosphor-icons/react"
+import { Plus, Trash, PencilSimple, Check, X, Storefront, Palette, Scissors, Key, ChatTeardrop, ArrowRight, Power, Users, UserCircle } from "@phosphor-icons/react"
 import { useStore } from "@/context/store"
 import { useTheme } from "@/lib/theme"
 import { useToast } from "@/lib/toast"
-import { useAuth } from "@/lib/auth"
 
 export default function Ajustes() {
-  const { negocio, servicios, updateNegocio, updatePreferencias, preferencias, addServicio, updateServicio, removeServicio } = useStore()
+  const { negocio, servicios, updateNegocio, updatePreferencias, preferencias, addServicio, updateServicio, removeServicio, esBarbero } = useStore()
   const { theme, setTheme, THEMES } = useTheme()
   const push = useToast()
-  const { updateCredentials } = useAuth()
 
   const [identidad, setIdentidad] = useState({
-    nombre: negocio.nombre,
-    direccion: negocio.direccion,
-    telefono: negocio.telefono,
-    qrUrl: negocio.qrUrl,
+    nombre: negocio?.nombre || "",
+    direccion: negocio?.direccion || "",
+    telefono: negocio?.telefono || "",
   })
 
   const [notif, setNotif] = useState({
     horasRecordatorio: preferencias?.horasRecordatorio ?? 2,
-    whatsappNumero: preferencias?.whatsappNumero ?? negocio.telefono,
+    whatsappNumero: preferencias?.whatsappNumero ?? negocio?.telefono ?? "",
   })
 
   const [servicioForm, setServicioForm] = useState({ nombre: "", duracion: 30, precio: "" })
   const [editId, setEditId] = useState(null)
-
-  const [creds, setCreds] = useState({ user: "", pass: "", confirm: "" })
-
-  const saveCreds = (e) => {
-    e.preventDefault()
-    if (!creds.user.trim() || !creds.pass) return
-    if (creds.pass !== creds.confirm) return
-    updateCredentials(creds.user.trim(), creds.pass)
-    setCreds({ user: "", pass: "", confirm: "" })
-    push("Credenciales actualizadas")
-  }
 
   const saveIdentidad = (e) => {
     e.preventDefault()
@@ -80,6 +66,29 @@ export default function Ajustes() {
   const input = "w-full mt-1 surface px-3 py-2 text-sm"
   const label = "block text-xs font-semibold text-[var(--fg-muted)] uppercase tracking-wider"
 
+  if (esBarbero) {
+    return (
+      <div className="space-y-6">
+        <h1 className="text-xl font-extrabold tracking-tight">Mi perfil</h1>
+        <section className="space-y-4">
+          <h2 className="flex items-center gap-2 text-sm font-bold text-[var(--fg)]"><Key size={18} weight="duotone" className="text-[var(--accent)]" /> Preferencias</h2>
+          <form onSubmit={saveNotif} className="surface p-6 space-y-4">
+            <label className="block">
+              <span className={label}>Teléfono de contacto</span>
+              <input className={input} value={notif.whatsappNumero} onChange={(e) => setNotif({ ...notif, whatsappNumero: e.target.value })} placeholder="+56912345678" />
+            </label>
+            <div className="flex justify-end">
+              <button type="submit" className="flex items-center gap-2 bg-[var(--accent)] text-white text-sm font-semibold px-4 py-2 rounded-xl">
+                <Check size={16} weight="bold" /> Guardar
+              </button>
+            </div>
+          </form>
+        </section>
+        <p className="text-xs text-[var(--fg-muted)]">Desde aquí ves solo tu actividad. El dueño administra servicios, el negocio y el equipo.</p>
+      </div>
+    )
+  }
+
   return (
     <div className="space-y-6">
       <h1 className="text-xl font-extrabold tracking-tight">Ajustes</h1>
@@ -101,10 +110,6 @@ export default function Ajustes() {
               <label className={label}>Dirección</label>
               <input className={input} value={identidad.direccion} onChange={(e) => setIdentidad({ ...identidad, direccion: e.target.value })} />
             </div>
-            <div>
-              <label className={label}>Link del QR (WhatsApp)</label>
-              <input className={input} value={identidad.qrUrl} onChange={(e) => setIdentidad({ ...identidad, qrUrl: e.target.value })} placeholder="https://wa.me/56911112222" />
-            </div>
           </div>
           <div className="flex justify-end">
             <button type="submit" className="flex items-center gap-2 bg-[var(--accent)] text-white text-sm font-semibold px-4 py-2 rounded-xl">
@@ -112,6 +117,12 @@ export default function Ajustes() {
             </button>
           </div>
         </form>
+      </section>
+
+      {/* Trabajadores */}
+      <section className="space-y-4">
+        <h2 className="flex items-center gap-2 text-sm font-bold text-[var(--fg)]"><Users size={18} weight="duotone" className="text-[var(--accent)]" /> Trabajadores</h2>
+        <Trabajadores />
       </section>
 
       {/* Tema visual */}
@@ -147,7 +158,7 @@ export default function Ajustes() {
             <div>
               <label className={label}>Horas antes del turno</label>
               <input type="number" min="0" step="1" className={input} value={notif.horasRecordatorio} onChange={(e) => setNotif({ ...notif, horasRecordatorio: e.target.value })} />
-              <p className="mt-1 text-xs text-[var(--fg-muted)]">Se avisa al cliente {typeof notif.horasRecordatorio === "number" || notif.horasRecordatorio ? notif.horasRecordatorio : "2"} h antes de su cita.</p>
+              <p className="mt-1 text-xs text-[var(--fg-muted)]">Se avisa al cliente {notif.horasRecordatorio || "2"} h antes de su cita.</p>
             </div>
             <div>
               <label className={label}>Número de WhatsApp</label>
@@ -164,14 +175,14 @@ export default function Ajustes() {
 
       {/* Página pública */}
       <section className="space-y-4">
-        <h2 className="flex items-center gap-2 text-sm font-bold text-[var(--fg)]"><ArrowSquareOut size={18} weight="duotone" className="text-[var(--accent)]" /> Página pública</h2>
+        <h2 className="flex items-center gap-2 text-sm font-bold text-[var(--fg)]"><ArrowRight size={18} weight="duotone" className="text-[var(--accent)]" /> Página pública</h2>
         <div className="surface p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
           <div>
             <p className="text-sm font-semibold">Tu página de reservas online</p>
             <p className="text-xs text-[var(--fg-muted)]">Lo que ven tus clientes al escanear el QR.</p>
           </div>
-          <a href={`#/c/${negocio.slug}`} className="inline-flex items-center gap-2 bg-[var(--accent)] text-white text-sm font-semibold px-4 py-2 rounded-xl">
-            <ArrowSquareOut size={16} weight="bold" /> Ver página
+          <a href={`#/c/${negocio?.slug}`} className="inline-flex items-center gap-2 bg-[var(--accent)] text-white text-sm font-semibold px-4 py-2 rounded-xl">
+            <ArrowRight size={16} weight="bold" /> Ver página
           </a>
         </div>
       </section>
@@ -194,9 +205,9 @@ export default function Ajustes() {
               <input type="number" className={input} value={servicioForm.precio} onChange={(e) => setServicioForm({ ...servicioForm, precio: e.target.value })} placeholder="12000" min="0" required />
             </div>
             <div className="flex gap-2">
-              {editId ? (
+              {editId && (
                 <button type="button" onClick={cancelEdit} className="surface px-3 py-2 text-sm"><X size={16} /></button>
-              ) : null}
+              )}
               <button type="submit" className="flex items-center gap-2 bg-[var(--accent)] text-white text-sm font-semibold px-4 py-2 rounded-xl">
                 <Plus size={16} weight="bold" /> {editId ? "Guardar" : "Agregar"}
               </button>
@@ -205,59 +216,111 @@ export default function Ajustes() {
         </form>
 
         <div className="space-y-2">
-          {servicios.map((s) => (
+          {servicios?.map((s) => (
             <div key={s.id} className="surface flex items-center justify-between gap-3 px-4 py-3">
               <div>
                 <p className="text-sm font-semibold">{s.nombre}</p>
                 <p className="text-xs text-[var(--fg-muted)]">{s.duracion} min</p>
               </div>
               <div className="flex items-center gap-3">
-                <p className="text-sm font-extrabold">${s.precio.toLocaleString("es-CL")}</p>
+                <p className="text-sm font-extrabold">${(s.precio || 0).toLocaleString("es-CL")}</p>
                 <button onClick={() => startEdit(s)} className="text-[var(--fg-muted)] hover:text-[var(--accent)]"><PencilSimple size={16} /></button>
                 <button onClick={() => { removeServicio(s.id); push("Servicio eliminado") }} className="text-[var(--fg-muted)] hover:text-red-500"><Trash size={16} /></button>
               </div>
             </div>
           ))}
-          {servicios.length === 0 && <p className="text-sm text-[var(--fg-muted)]">No hay servicios. Agrega el primero arriba.</p>}
+          {(servicios?.length || 0) === 0 && <p className="text-sm text-[var(--fg-muted)]">No hay servicios. Agrega el primero arriba.</p>}
         </div>
       </section>
+    </div>
+  )
+}
 
-      {/* Horario */}
-      <section className="space-y-4">
-        <h2 className="flex items-center gap-2 text-sm font-bold text-[var(--fg)]"><Clock size={18} weight="duotone" className="text-[var(--accent)]" /> Horario (próximamente)</h2>
-        <div className="surface p-6">
-          <p className="text-sm text-[var(--fg-muted)]">La gestión de horarios y empleados llega en la siguiente fase.</p>
-        </div>
-      </section>
+function Trabajadores() {
+  const { empleados, addEmpleado, updateEmpleado, resetearClave } = useStore()
+  const push = useToast()
+  const [nombre, setNombre] = useState("")
+  const [email, setEmail] = useState("")
+  const [ocupado, setOcupado] = useState(false)
 
-      {/* Acceso */}
-      <section className="space-y-4">
-        <h2 className="flex items-center gap-2 text-sm font-bold text-[var(--fg)]"><Key size={18} weight="duotone" className="text-[var(--accent)]" /> Acceso del barbero</h2>
-        <form onSubmit={saveCreds} className="surface p-6 space-y-4">
-          <div className="grid gap-4 sm:grid-cols-3">
-            <div>
-              <label className={label}>Usuario</label>
-              <input className={input} value={creds.user} onChange={(e) => setCreds({ ...creds, user: e.target.value })} placeholder="demo" required />
+  const agregar = async (e) => {
+    e.preventDefault()
+    if (!nombre.trim()) return
+    setOcupado(true)
+    try {
+      await addEmpleado(nombre.trim(), email.trim() || undefined)
+      setNombre("")
+      setEmail("")
+      push(email.trim() ? "Barbero agregado con cuenta de acceso" : "Barbero agregado")
+    } catch (err) {
+      push(err?.message || "No se pudo agregar el barbero", "error")
+    } finally {
+      setOcupado(false)
+    }
+  }
+
+  const toggleActivado = async (e, ev) => {
+    ev.stopPropagation()
+    ev.preventDefault()
+    const activado = !e.activado
+    try {
+      await updateEmpleado(e.id, { activado })
+      push(activado ? "Empleado reactivado" : "Empleado desactivado")
+    } catch (err) {
+      push(err?.message || "No se pudo actualizar", "error")
+    }
+  }
+
+  const resetClaveDe = (e, ev) => {
+    ev.stopPropagation()
+    ev.preventDefault()
+    push(resetearClave())
+  }
+
+  return (
+    <div className="space-y-3">
+      <form onSubmit={agregar} className="surface p-5 flex flex-col sm:flex-row gap-3">
+        <input
+          className="flex-1 surface px-3 py-2.5 text-sm outline-none"
+          value={nombre}
+          onChange={(e) => setNombre(e.target.value)}
+          placeholder="Nombre del barbero"
+          required
+        />
+        <input
+          type="email"
+          className="flex-1 surface px-3 py-2.5 text-sm outline-none"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          placeholder="email@acceso (opcional)"
+        />
+        <button type="submit" disabled={ocupado} className="flex items-center justify-center gap-2 bg-[var(--accent)] text-white text-sm font-semibold px-4 py-2.5 rounded-xl disabled:opacity-40">
+          <Plus size={16} weight="bold" /> {ocupado ? "Agregando…" : "Agregar"}
+        </button>
+      </form>
+
+      <div className="space-y-2">
+        {empleados.map((e) => (
+          <div key={e.id} className="surface flex items-center justify-between gap-3 px-4 py-3">
+            <div className="min-w-0">
+              <p className="text-sm font-semibold">{e.nombre}</p>
+              <p className="text-xs text-[var(--fg-muted)]">
+                {e.usuarioAuth ? "Tiene cuenta de acceso" : "Sin cuenta de acceso"}
+              </p>
             </div>
-            <div>
-              <label className={label}>Nueva contraseña</label>
-              <input type="password" className={input} value={creds.pass} onChange={(e) => setCreds({ ...creds, pass: e.target.value })} placeholder="••••••••" required />
-            </div>
-            <div>
-              <label className={label}>Confirmar contraseña</label>
-              <input type="password" className={input} value={creds.confirm} onChange={(e) => setCreds({ ...creds, confirm: e.target.value })} placeholder="••••••••" required />
+            <div className="flex items-center gap-2 shrink-0">
+              {!e.activado && <span className="text-[10px] font-semibold px-2 py-0.5 rounded-lg bg-red-500/10 text-red-600">Inactivo</span>}
+              <button onClick={(ev) => resetClaveDe(e, ev)} className="text-xs font-semibold text-[var(--fg-muted)] hover:text-[var(--accent)]">
+                Reset clave
+              </button>
+              <button onClick={(ev) => toggleActivado(e, ev)} className="text-[var(--fg-muted)] hover:text-amber-600" title={e.activado ? "Desactivar" : "Reactivar"}>
+                {e.activado ? <Power size={18} /> : <UserCircle size={18} />}
+              </button>
             </div>
           </div>
-          {creds.pass && creds.confirm && creds.pass !== creds.confirm && (
-            <p className="text-xs text-red-500">Las contraseñas no coinciden.</p>
-          )}
-          <div className="flex justify-end">
-            <button type="submit" className="flex items-center gap-2 bg-[var(--accent)] text-white text-sm font-semibold px-4 py-2 rounded-xl">
-              <Check size={16} weight="bold" /> Guardar credenciales
-            </button>
-          </div>
-        </form>
-      </section>
+        ))}
+        {empleados.length === 0 && <p className="text-sm text-[var(--fg-muted)]">Aún no agregas trabajadores.</p>}
+      </div>
     </div>
   )
 }

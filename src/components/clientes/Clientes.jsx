@@ -7,7 +7,10 @@ import ClienteModal from "./ClienteModal"
 import FichaCliente from "./FichaCliente"
 
 export default function Clientes() {
-  const { clientes, ventas, turnos } = useStore()
+  const { clientes: clientesRaw, ventas: ventasRaw, turnos: turnosRaw, scope, esBarbero } = useStore()
+  const clientes = esBarbero ? scope.clientes : clientesRaw
+  const ventas = esBarbero ? scope.ventas : ventasRaw
+  const turnos = esBarbero ? scope.turnos : turnosRaw
   const [ficha, setFicha] = useState(null)
   const [modal, setModal] = useState(null) // null | "nuevo" | {cliente}
   const [q, setQ] = useState("")

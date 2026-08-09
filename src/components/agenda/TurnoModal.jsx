@@ -5,14 +5,14 @@ import { useStore } from "@/context/store"
 import { useToast } from "@/lib/toast"
 import { hoyKey, formatCLP } from "@/lib/format"
 
-export default function TurnoModal({ onClose }) {
-  const { clientes, servicios, empleados, addTurno } = useStore()
+export default function TurnoModal({ onClose, empleadoPorDefecto }) {
+  const { clientes, servicios, empleados, addTurno, esBarbero, session } = useStore()
   const push = useToast()
   const [clienteId, setClienteId] = useState(clientes[0]?.id || "")
   const [servicioId, setServicioId] = useState(servicios[0]?.id || "")
   const [fecha, setFecha] = useState(hoyKey())
   const [hora, setHora] = useState("10:00")
-  const [empleadoId, setEmpleadoId] = useState(empleados[0]?.id || "")
+  const [empleadoId, setEmpleadoId] = useState(empleadoPorDefecto || (esBarbero ? session?.barberoId : undefined) || empleados[0]?.id || "")
 
   const ref = useRef(null)
   const prevFocus = useRef(null)
@@ -53,7 +53,7 @@ export default function TurnoModal({ onClose }) {
           <label className="block">
             <span className="text-xs font-semibold text-[var(--fg-muted)]">Servicio</span>
             <select value={servicioId} onChange={(e) => setServicioId(e.target.value)} required className="w-full mt-1 surface px-3 py-2 text-sm">
-              {servicios.map((s) => <option key={s.id} value={s.id}>{s.nombre} â€” {formatCLP(s.precio)}</option>)}
+              {servicios.map((s) => <option key={s.id} value={s.id}>{s.nombre} — {formatCLP(s.precio)}</option>)}
             </select>
           </label>
           <div className="grid grid-cols-2 gap-3">
@@ -66,12 +66,14 @@ export default function TurnoModal({ onClose }) {
               <input type="time" value={hora} onChange={(e) => setHora(e.target.value)} className="w-full mt-1 surface px-3 py-2 text-sm" />
             </label>
           </div>
-          <label className="block">
-            <span className="text-xs font-semibold text-[var(--fg-muted)]">Empleado</span>
-            <select value={empleadoId} onChange={(e) => setEmpleadoId(e.target.value)} className="w-full mt-1 surface px-3 py-2 text-sm">
-              {empleados.map((em) => <option key={em.id} value={em.id}>{em.nombre}</option>)}
-            </select>
-          </label>
+          {!esBarbero && (
+            <label className="block">
+              <span className="text-xs font-semibold text-[var(--fg-muted)]">Empleado</span>
+              <select value={empleadoId} onChange={(e) => setEmpleadoId(e.target.value)} className="w-full mt-1 surface px-3 py-2 text-sm">
+                {empleados.map((em) => <option key={em.id} value={em.id}>{em.nombre}</option>)}
+              </select>
+            </label>
+          )}
           <button type="submit" disabled={!clienteId || !servicioId} className="w-full mt-2 bg-[var(--accent)] text-white font-semibold py-2.5 rounded-xl disabled:opacity-40 disabled:cursor-not-allowed">Guardar turno</button>
         </form>
       </motion.div>

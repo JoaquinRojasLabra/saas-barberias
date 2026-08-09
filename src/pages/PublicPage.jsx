@@ -18,15 +18,19 @@ const iconoDeServicio = (nombre) => {
   return Scissors
 }
 
-export default function PublicPage() {
-  const { negocio, servicios, empleados } = useStore()
+export default function PublicPage({ slug }) {
+  const { negocio, servicios, empleados, activarPorSlug } = useStore()
   const { theme, setTheme } = useTheme()
+
+  useEffect(() => {
+    if (slug) activarPorSlug(slug)
+  }, [slug, activarPorSlug])
 
   useEffect(() => {
     const { query } = leerRuta()
     const { tema } = parametrosDe(query)
-    setTheme(tema || negocio.tema || "elegante")
-  }, [negocio.tema, setTheme])
+    setTheme(tema || negocio?.tema || "elegante")
+  }, [negocio?.tema, setTheme])
 
   return (
     <div key={theme} className="min-h-screen text-[var(--fg)] relative overflow-hidden">
@@ -35,12 +39,12 @@ export default function PublicPage() {
         <motion.header initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="flex flex-col items-center text-center gap-4">
           <Logo3D />
           <p className="uppercase tracking-[0.2em] text-xs text-[var(--fg-muted)]">Tu barbería</p>
-          <h1 className="font-display text-4xl sm:text-5xl font-black tracking-tight">{negocio.nombre}</h1>
-          <p className="text-[var(--fg-muted)] max-w-xl">{negocio.direccion}</p>
+          <h1 className="font-display text-4xl sm:text-5xl font-black tracking-tight">{negocio?.nombre}</h1>
+          <p className="text-[var(--fg-muted)] max-w-xl">{negocio?.direccion}</p>
           <div className="flex flex-wrap items-center justify-center gap-2 text-xs text-[var(--fg-muted)]">
             <span className="flex items-center gap-1"><MapPin size={14} /> Santiago</span>
             <span className="flex items-center gap-1"><Clock size={14} /> 09:00 – 18:00</span>
-            <span className="flex items-center gap-1"><Phone size={14} /> {negocio.telefono}</span>
+            <span className="flex items-center gap-1"><Phone size={14} /> {negocio?.telefono}</span>
           </div>
           <motion.button
             whileHover={{ scale: 1.03 }}
@@ -48,7 +52,7 @@ export default function PublicPage() {
             onClick={() => {
               const { query } = leerRuta()
               const { tema } = parametrosDe(query)
-              navegarA(`/c/${negocio.slug}/reserva${tema ? `?tema=${tema}` : ""}`)
+              navegarA(`/c/${negocio?.slug || slug}/reserva${tema ? `?tema=${tema}` : ""}`)
             }}
             className="mt-4 inline-flex items-center gap-2 bg-[var(--accent)] text-white font-semibold px-6 py-3 rounded-2xl shadow-[var(--shadow-lg)]"
           >

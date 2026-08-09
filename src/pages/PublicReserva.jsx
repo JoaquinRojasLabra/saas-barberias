@@ -10,26 +10,37 @@ import Background from "@/components/Background"
 
 const pasosLabel = ["Servicio", "Horario", "Tus datos", "Confirmar"]
 const MAX = pasosLabel.length - 1
+const METODOS = ["En la barbería", "En línea"]
 
-export default function PublicReserva() {
-  const { negocio, servicios, empleados, clientes, turnos, slotsHorario, tomarCita, addCliente } = useStore()
+export default function PublicReserva({ slug }) {
+  const { negocio, servicios, empleados, slotsHorario, tomarCita, horariosOcupados, activarPorSlug } = useStore()
   const { setTheme } = useTheme()
   const push = useToast()
   const [paso, setPaso] = useState(0)
   const [servicioId, setServicioId] = useState("")
-  const [empleadoId, setEmpleadoId] = useState(empleados[0]?.id || "")
+  const [empleadoId, setEmpleadoId] = useState("")
   const [fecha, setFecha] = useState(hoyKey())
   const [hora, setHora] = useState("")
   const [nombre, setNombre] = useState("")
   const [telefono, setTelefono] = useState("")
+  const [metodo, setMetodo] = useState(METODOS[0])
+  const [ocupadas, setOcupadas] = useState([])
+  const [guardando, setGuardando] = useState(false)
 
-  const slug = slugDe(window.location.hash)
+  const slugActual = slug || slugDe(window.location.hash)
   const servicio = servicios.find((s) => s.id === servicioId)
   const empleado = empleados.find((e) => e.id === empleadoId)
 
-  const ocupadas = turnos
-    .filter((t) => t.fecha === fecha && t.empleadoId === empleadoId && !["cancelado", "no-llego"].includes(t.estado))
-    .map((t) => t.hora)
+  useEffect(() => {
+    if (slugActual) activarPorSlug(slugActual)
+  }, [slugActual, activarPorSlug])
+
+  useEffect(() => {
+    if (empleadoId && fecha) {
+      horariosOcupados(fecha, empleadoId).then(setOcupadas).catch(() => setOcupadas([]))
+    }
+  }, [fecha, empleadoId, horariosOcupados])
+
   const libres = slotsHorario.filter((h) => !ocupadas.includes(h))
 
   const siguiente = () => setPaso((p) => Math.min(p + 1, MAX))
@@ -37,19 +48,25 @@ export default function PublicReserva() {
   const puedeGuardar = (p) =>
     p === 0 ? !!servicioId : p === 1 ? !!hora : p === 2 ? nombre.trim() && telefono.trim() : true
 
-  const confirmar = () => {
-    const existente = clientes.find((c) => c.nombre.toLowerCase() === nombre.trim().toLowerCase())
-    const cliente = existente || addCliente({ nombre: nombre.trim(), telefono: telefono.trim(), visitas: 0 })
-    tomarCita({ clienteId: cliente.id, servicioId, fecha, hora, empleadoId })
-    push("¡Cita confirmada! Te esperamos.")
-    navegarA(`/c/${slug}`)
+  const confirmar = async () => {
+    setGuardando(true)
+    try {
+      const metodoPago = metodo === "En línea" ? "En línea" : null
+      await tomarCita({ nombre: nombre.trim(), telefono: telefono.trim(), servicioId, fecha, hora, empleadoId, metodoPago })
+      push(metodoPago === "En línea" ? "Reserva creada. Se generó un pago en línea pendiente." : "¡Cita confirmada! Te esperamos.")
+      navegarA(`/c/${slugActual}`)
+    } catch (e) {
+      push((e?.message || "No se pudo reservar. Intenta de nuevo.").replace(/^RPC exception on /, ""), "error")
+    } finally {
+      setGuardando(false)
+    }
   }
 
   useEffect(() => {
     const { query } = leerRuta()
     const { tema } = parametrosDe(query)
-    setTheme(tema || negocio.tema || "elegante")
-  }, [negocio.tema, setTheme])
+    setTheme(tema || negocio?.tema || "elegante")
+  }, [negocio?.tema, setTheme])
 
   const input = "w-full surface px-3 py-2 text-sm"
 
@@ -199,6 +216,30 @@ export default function PublicReserva() {
               <div className="flex justify-between"><span className="text-[var(--fg-muted)]">Hora</span><span className="font-semibold">{hora}</span></div>
               <div className="flex justify-between border-t border-[var(--border)] pt-2 mt-2"><span className="text-[var(--fg-muted)]">Total</span><span className="font-extrabold text-lg">{formatCLP(servicio?.precio || 0)}</span></div>
             </motion.div>
+            <div>
+              <p className="text-xs font-semibold text-[var(--fg-muted)] uppercase tracking-wider mb-2">Cómo pagarás</p>
+              <div className="grid grid-cols-2 gap-2">
+                {METODOS.map((m) => {
+                  const sel = metodo === m
+                  return (
+                    <motion.button
+                      key={m}
+                      type="button"
+                      whileTap={{ scale: 0.95 }}
+                      onClick={() => setMetodo(m)}
+                      className={`px-3 py-2.5 rounded-xl text-sm font-semibold border transition-colors ${sel ? selClase : noSelClase} border-[var(--border)]`}
+                    >
+                      {m === "En línea" ? "Pago en línea" : "En la barbería"}
+                    </motion.button>
+                  )
+                })}
+              </div>
+              {metodo === "En línea" && (
+                <p className="text-xs text-[var(--fg-muted)] flex items-center gap-1.5 bg-[var(--bg-card)] border border-[var(--border)] rounded-xl px-3 py-2.5">
+                  <Check size={14} className="text-[var(--accent)]" /> Reservas tu cupo y generas un pago en línea. Podrás confirmarlo después.
+                </p>
+              )}
+            </div>
           </>
         )}
 
@@ -221,9 +262,10 @@ export default function PublicReserva() {
               whileTap={{ scale: 0.96 }}
               whileHover={{ scale: 1.02 }}
               onClick={confirmar}
-              className="flex-1 flex items-center justify-center gap-2 bg-gradient-to-br from-[var(--accent)] to-[var(--accent-2)] text-white font-semibold py-3 rounded-2xl shadow-[var(--shadow-lg)]"
+              disabled={guardando}
+              className="flex-1 flex items-center justify-center gap-2 bg-gradient-to-br from-[var(--accent)] to-[var(--accent-2)] text-white font-semibold py-3 rounded-2xl shadow-[var(--shadow-lg)] disabled:opacity-50 disabled:pointer-events-none"
             >
-              <Check size={18} weight="bold" /> Confirmar cita
+              {guardando ? "Guardando…" : (<><Check size={18} weight="bold" /> Confirmar cita</>)}
             </motion.button>
           )}
         </div>
