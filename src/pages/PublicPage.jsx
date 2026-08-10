@@ -1,6 +1,6 @@
 import { useEffect } from "react"
 import { motion } from "framer-motion"
-import { CalendarCheck, Phone, MapPin, Clock, ArrowRight, Scissors, PaintBrush, Drop, Sparkle, UserFocus } from "@phosphor-icons/react"
+import { CalendarCheck, Phone, MapPin, Clock, ArrowRight, Scissors, PaintBrush, Drop, Sparkle, UserFocus, Camera } from "@phosphor-icons/react"
 import { useStore } from "@/context/store"
 import { useTheme } from "@/lib/theme"
 import { formatCLP } from "@/lib/format"
@@ -19,7 +19,7 @@ const iconoDeServicio = (nombre) => {
 }
 
 export default function PublicPage({ slug }) {
-  const { negocio, servicios, empleados, activarPorSlug, error } = useStore()
+  const { negocio, servicios, empleados, activarPorSlug, error, galeria } = useStore()
   const { theme, setTheme } = useTheme()
 
   useEffect(() => {
@@ -55,14 +55,20 @@ export default function PublicPage({ slug }) {
       <Background />
       <div className="max-w-5xl mx-auto px-6 py-12 sm:py-16 relative z-10">
         <motion.header initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="flex flex-col items-center text-center gap-4">
-          <Logo3D />
+          {negocio?.logoTipo === "imagen" && negocio?.logoUrl ? (
+            <img src={negocio.logoUrl} alt={negocio?.nombre || "Logo"} className="w-24 h-24 rounded-3xl object-cover shadow-[var(--shadow-lg)]" />
+          ) : (
+            <Logo3D color={negocio?.accentColor || undefined} />
+          )}
           <p className="uppercase tracking-[0.2em] text-xs text-[var(--fg-muted)]">Tu barbería</p>
           <h1 className="font-display text-4xl sm:text-5xl font-black tracking-tight">{negocio?.nombre}</h1>
           <p className="text-[var(--fg-muted)] max-w-xl">{negocio?.direccion}</p>
           <div className="flex flex-wrap items-center justify-center gap-2 text-xs text-[var(--fg-muted)]">
-            <span className="flex items-center gap-1"><MapPin size={14} /> Santiago</span>
-            <span className="flex items-center gap-1"><Clock size={14} /> 09:00 – 18:00</span>
-            <span className="flex items-center gap-1"><Phone size={14} /> {negocio?.telefono}</span>
+            {negocio?.ciudad && <span className="flex items-center gap-1"><MapPin size={14} /> {negocio.ciudad}</span>}
+            {negocio?.horaApertura && negocio?.horaCierre && (
+              <span className="flex items-center gap-1"><Clock size={14} /> {negocio.horaApertura} – {negocio.horaCierre}</span>
+            )}
+            {negocio?.telefono && <span className="flex items-center gap-1"><Phone size={14} /> {negocio.telefono}</span>}
           </div>
           <motion.button
             whileHover={{ scale: 1.03 }}
@@ -110,6 +116,25 @@ export default function PublicPage({ slug }) {
             })}
           </div>
         </motion.section>
+
+        {negocio?.mostrarGaleria && galeria.length > 0 && (
+          <motion.section initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.28 }} className="mt-14">
+            <h2 className="text-sm font-bold text-[var(--fg-muted)] uppercase tracking-widest mb-4 flex items-center gap-2"><Camera size={16} /> Nuestros trabajos</h2>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+              {galeria.map((g, i) => (
+                <motion.div
+                  key={g.id || i}
+                  initial={{ opacity: 0, scale: 0.96 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: 0.3 + i * 0.05 }}
+                  className="overflow-hidden rounded-2xl border border-[var(--border)]"
+                >
+                  <img src={g.url} alt={`Trabajo ${i + 1}`} className="w-full aspect-square object-cover hover:scale-105 transition-transform cursor-pointer" loading="lazy" />
+                </motion.div>
+              ))}
+            </div>
+          </motion.section>
+        )}
 
         <motion.section initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.35 }} className="mt-14">
           <h2 className="text-sm font-bold text-[var(--fg-muted)] uppercase tracking-widest mb-4">Nuestro equipo</h2>
