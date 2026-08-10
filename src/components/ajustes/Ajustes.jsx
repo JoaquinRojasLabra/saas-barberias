@@ -1,11 +1,11 @@
 import { useState } from "react"
-import { Plus, Trash, PencilSimple, Check, X, Storefront, Palette, Scissors, Key, ChatTeardrop, ArrowRight, Power, Users, UserCircle } from "@phosphor-icons/react"
+import { Plus, Trash, PencilSimple, Check, X, Storefront, Palette, Scissors, Key, ChatTeardrop, ArrowRight, Power, Users, UserCircle, Bank, CurrencyDollar, CreditCard } from "@phosphor-icons/react"
 import { useStore } from "@/context/store"
 import { useTheme } from "@/lib/theme"
 import { useToast } from "@/lib/toast"
 
 export default function Ajustes() {
-  const { negocio, servicios, updateNegocio, updatePreferencias, preferencias, addServicio, updateServicio, removeServicio, esBarbero } = useStore()
+  const { negocio, servicios, empleados, session, updateNegocio, updatePreferencias, preferencias, addServicio, updateServicio, removeServicio, esBarbero, updateEmpleado, guardarCredencialesMp, datosPago, setView } = useStore()
   const { theme, setTheme, THEMES } = useTheme()
   const push = useToast()
 
@@ -22,6 +22,66 @@ export default function Ajustes() {
 
   const [servicioForm, setServicioForm] = useState({ nombre: "", duracion: 30, precio: "" })
   const [editId, setEditId] = useState(null)
+
+  const [pagos, setPagos] = useState({
+    pagoEfectivo: preferencias?.pagoEfectivo !== false,
+    pagoTransferencia: preferencias?.pagoTransferencia === true,
+    pagoMp: preferencias?.pagoMp === true,
+    transferenciasBanco: preferencias?.transferenciasBanco || "",
+    transferenciasTipoCuenta: preferencias?.transferenciasTipoCuenta || "",
+    transferenciasNumero: preferencias?.transferenciasNumero || "",
+    transferenciasRut: preferencias?.transferenciasRut || "",
+    transferenciasTitular: preferencias?.transferenciasTitular || "",
+  })
+
+  const [mpCreds, setMpCreds] = useState({ publicKey: "", accessToken: "" })
+
+  const miEmpleado = esBarbero ? empleados.find((e) => e.id === session?.barberoId) : null
+  const [transfer, setTransfer] = useState({
+    transferenciasBanco: miEmpleado?.transferenciasBanco || "",
+    transferenciasTipoCuenta: miEmpleado?.transferenciasTipoCuenta || "",
+    transferenciasNumero: miEmpleado?.transferenciasNumero || "",
+    transferenciasRut: miEmpleado?.transferenciasRut || "",
+    transferenciasTitular: miEmpleado?.transferenciasTitular || "",
+  })
+  const saveTransfer = (e) => {
+    e.preventDefault()
+    updateEmpleado(session.barberoId, transfer)
+    push("Tus datos de transferencia se guardaron")
+  }
+
+  const toggleMetodo = (campo, valor) => {
+    setPagos((prev) => ({ ...prev, [campo]: valor }))
+    updatePreferencias({ [campo]: valor })
+    push(valor ? "Método activado" : "Método desactivado")
+  }
+
+  const saveTransferenciasNegocio = (e) => {
+    e.preventDefault()
+    updatePreferencias({
+      transferenciasBanco: pagos.transferenciasBanco,
+      transferenciasTipoCuenta: pagos.transferenciasTipoCuenta,
+      transferenciasNumero: pagos.transferenciasNumero,
+      transferenciasRut: pagos.transferenciasRut,
+      transferenciasTitular: pagos.transferenciasTitular,
+    })
+    push("Datos de transferencia guardados")
+  }
+
+  const saveMpCreds = (e) => {
+    e.preventDefault()
+    if (!mpCreds.publicKey.trim() || !mpCreds.accessToken.trim()) {
+      push("Completa la Public Key y el Access Token", "error")
+      return
+    }
+    guardarCredencialesMp({ publicKey: mpCreds.publicKey.trim(), accessToken: mpCreds.accessToken.trim() })
+      .then(() => {
+        updatePreferencias({ pagoMp: true })
+        push("Credenciales de Mercado Pago guardadas")
+        setMpCreds({ publicKey: "", accessToken: "" })
+      })
+      .catch((err) => push(err?.message || "No se pudieron guardar las credenciales", "error"))
+  }
 
   const saveIdentidad = (e) => {
     e.preventDefault()
@@ -84,6 +144,40 @@ export default function Ajustes() {
             </div>
           </form>
         </section>
+
+        <section className="space-y-4">
+          <h2 className="flex items-center gap-2 text-sm font-bold text-[var(--fg)]"><Bank size={18} weight="duotone" className="text-[var(--accent)]" /> Mis datos de transferencia</h2>
+          <form onSubmit={saveTransfer} className="surface p-6 space-y-4">
+            <p className="text-xs text-[var(--fg-muted)]">Estos datos verán tus clientes cuando reserven contigo y elijan pagar por transferencia.</p>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div>
+                <label className={label}>Banco</label>
+                <input className={input} value={transfer.transferenciasBanco} onChange={(e) => setTransfer({ ...transfer, transferenciasBanco: e.target.value })} placeholder="Ej. Banco Estado" />
+              </div>
+              <div>
+                <label className={label}>Tipo de cuenta</label>
+                <input className={input} value={transfer.transferenciasTipoCuenta} onChange={(e) => setTransfer({ ...transfer, transferenciasTipoCuenta: e.target.value })} placeholder="Cuenta corriente / vista / rut" />
+              </div>
+              <div>
+                <label className={label}>N° de cuenta</label>
+                <input className={input} value={transfer.transferenciasNumero} onChange={(e) => setTransfer({ ...transfer, transferenciasNumero: e.target.value })} placeholder="123456789" />
+              </div>
+              <div>
+                <label className={label}>RUT</label>
+                <input className={input} value={transfer.transferenciasRut} onChange={(e) => setTransfer({ ...transfer, transferenciasRut: e.target.value })} placeholder="11.111.111-1" />
+              </div>
+              <div>
+                <label className={label}>Titular</label>
+                <input className={input} value={transfer.transferenciasTitular} onChange={(e) => setTransfer({ ...transfer, transferenciasTitular: e.target.value })} placeholder="Nombre del titular" />
+              </div>
+            </div>
+            <div className="flex justify-end">
+              <button type="submit" className="flex items-center gap-2 bg-[var(--accent)] text-white text-sm font-semibold px-4 py-2 rounded-xl">
+                <Check size={16} weight="bold" /> Guardar
+              </button>
+            </div>
+          </form>
+        </section>
         <p className="text-xs text-[var(--fg-muted)]">Desde aquí ves solo tu actividad. El dueño administra servicios, el negocio y el equipo.</p>
       </div>
     )
@@ -92,6 +186,13 @@ export default function Ajustes() {
   return (
     <div className="space-y-6">
       <h1 className="text-xl font-extrabold tracking-tight">Ajustes</h1>
+
+      <button
+        onClick={() => setView("personalizacion")}
+        className="inline-flex items-center gap-2 surface px-4 py-2.5 rounded-xl text-sm font-semibold text-[var(--accent)]"
+      >
+        <Palette size={18} /> Personalizar barbería
+      </button>
 
       {/* Identidad del negocio */}
       <section className="space-y-4">
@@ -185,6 +286,96 @@ export default function Ajustes() {
             <ArrowRight size={16} weight="bold" /> Ver página
           </a>
         </div>
+      </section>
+
+      {/* Métodos de pago */}
+      <section className="space-y-4">
+        <h2 className="flex items-center gap-2 text-sm font-bold text-[var(--fg)]"><CurrencyDollar size={18} weight="duotone" className="text-[var(--accent)]" /> Métodos de pago</h2>
+
+        <div className="surface p-6 space-y-4">
+          {[
+            { campo: "pagoEfectivo", label: "Efectivo", desc: "El cliente paga en la barbería." },
+            { campo: "pagoTransferencia", label: "Transferencia", desc: "Muestras tus datos para transferencias. Cada barbero puede tener los suyos." },
+            { campo: "pagoMp", label: "Mercado Pago", desc: datosPago?.mpConfigurado ? "Configurado con credenciales del negocio." : "Activa el cobro en línea. Requiere credenciales de Mercado Pago." },
+          ].map(({ campo, label, desc }) => {
+            const activo = pagos[campo]
+            return (
+              <div key={campo} className="flex items-center justify-between gap-3 border-b border-[var(--border)] last:border-0 pb-4 last:pb-0">
+                <div>
+                  <p className="text-sm font-semibold">{label}</p>
+                  <p className="text-xs text-[var(--fg-muted)]">{desc}</p>
+                </div>
+                <button
+                  type="button"
+                  role="switch"
+                  aria-checked={activo}
+                  onClick={() => toggleMetodo(campo, !activo)}
+                  className={`relative w-11 h-6 rounded-full transition-colors shrink-0 ${activo ? "bg-[var(--accent)]" : "bg-[var(--fg-muted)]/30"}`}
+                >
+                  <span className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform ${activo ? "translate-x-5" : ""}`} />
+                </button>
+              </div>
+            )
+          })}
+        </div>
+
+        {pagos.pagoTransferencia && (
+          <form onSubmit={saveTransferenciasNegocio} className="surface p-6 space-y-4">
+            <h3 className="flex items-center gap-2 text-sm font-bold text-[var(--fg)]"><Bank size={16} weight="duotone" className="text-[var(--accent)]" /> Datos del negocio</h3>
+            <p className="text-xs text-[var(--fg-muted)]">Se muestran al cliente cuando reserva sin elegir un barbero específico.</p>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div>
+                <label className={label}>Banco</label>
+                <input className={input} value={pagos.transferenciasBanco} onChange={(e) => setPagos({ ...pagos, transferenciasBanco: e.target.value })} placeholder="Ej. Banco Estado" />
+              </div>
+              <div>
+                <label className={label}>Tipo de cuenta</label>
+                <input className={input} value={pagos.transferenciasTipoCuenta} onChange={(e) => setPagos({ ...pagos, transferenciasTipoCuenta: e.target.value })} placeholder="Cuenta corriente / vista / rut" />
+              </div>
+              <div>
+                <label className={label}>N° de cuenta</label>
+                <input className={input} value={pagos.transferenciasNumero} onChange={(e) => setPagos({ ...pagos, transferenciasNumero: e.target.value })} placeholder="123456789" />
+              </div>
+              <div>
+                <label className={label}>RUT</label>
+                <input className={input} value={pagos.transferenciasRut} onChange={(e) => setPagos({ ...pagos, transferenciasRut: e.target.value })} placeholder="11.111.111-1" />
+              </div>
+              <div>
+                <label className={label}>Titular</label>
+                <input className={input} value={pagos.transferenciasTitular} onChange={(e) => setPagos({ ...pagos, transferenciasTitular: e.target.value })} placeholder="Nombre del titular" />
+              </div>
+            </div>
+            <div className="flex justify-end">
+              <button type="submit" className="flex items-center gap-2 bg-[var(--accent)] text-white text-sm font-semibold px-4 py-2 rounded-xl">
+                <Check size={16} weight="bold" /> Guardar datos
+              </button>
+            </div>
+          </form>
+        )}
+
+        {pagos.pagoMp && (
+          <form onSubmit={saveMpCreds} className="surface p-6 space-y-4">
+            <h3 className="flex items-center gap-2 text-sm font-bold text-[var(--fg)]"><CreditCard size={16} weight="duotone" className="text-[var(--accent)]" /> Credenciales de Mercado Pago</h3>
+            <p className="text-xs text-[var(--fg-muted)]">
+              {datosPago?.mpConfigurado ? "Ya hay credenciales guardadas. Puedes reemplazarlas aquí." : "Estas credenciales se guardan en el backend y nunca se muestran en el navegador."}
+            </p>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div>
+                <label className={label}>Public Key</label>
+                <input className={input} value={mpCreds.publicKey} onChange={(e) => setMpCreds({ ...mpCreds, publicKey: e.target.value })} placeholder="APP_USR-..." />
+              </div>
+              <div>
+                <label className={label}>Access Token</label>
+                <input type="password" className={input} value={mpCreds.accessToken} onChange={(e) => setMpCreds({ ...mpCreds, accessToken: e.target.value })} placeholder="APP_USR-..." />
+              </div>
+            </div>
+            <div className="flex justify-end">
+              <button type="submit" className="flex items-center gap-2 bg-[var(--accent)] text-white text-sm font-semibold px-4 py-2 rounded-xl">
+                <Check size={16} weight="bold" /> Guardar credenciales
+              </button>
+            </div>
+          </form>
+        )}
       </section>
 
       {/* Servicios */}

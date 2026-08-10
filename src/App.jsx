@@ -18,17 +18,18 @@ import Ventas from "@/components/ventas/Ventas"
 import Clientes from "@/components/clientes/Clientes"
 import QR from "@/components/qr/QR"
 import Ajustes from "@/components/ajustes/Ajustes"
+import Personalizacion from "@/components/personalizacion/Personalizacion"
 import { useRecordatorios } from "@/lib/recordatorios"
 
 const ParticleField = lazy(() => import("@/components/ParticleField"))
 
 function Shell() {
-  const { view } = useStore()
+  const { view, recuperando } = useStore()
   const { authed } = useAuth()
 
   useRecordatorios()
 
-  if (!authed) return <Login />
+  if (recuperando || !authed) return <Login />
 
   return (
     <div className="flex h-screen relative">
@@ -54,6 +55,7 @@ function Shell() {
               {view === "ventas" && <Ventas />}
               {view === "qr" && <QR />}
               {view === "ajustes" && <Ajustes />}
+              {view === "personalizacion" && <Personalizacion />}
             </motion.div>
           </AnimatePresence>
         </main>

@@ -1,5 +1,5 @@
 import { motion } from "framer-motion"
-import { ChartLineUp, CalendarCheck, Users, CurrencyCircleDollar, QrCode, GearSix, SignOut, Globe } from "@phosphor-icons/react"
+import { ChartLineUp, CalendarCheck, Users, CurrencyCircleDollar, QrCode, GearSix, SignOut, Globe, Palette } from "@phosphor-icons/react"
 import { useStore } from "@/context/store"
 import { useAuth } from "@/lib/auth"
 import { cn } from "@/lib/utils"
@@ -15,6 +15,7 @@ export default function Sidebar() {
     { id: "clientes", label: "Clientes", icon: Users, barbero: true },
     { id: "ventas", label: "Ventas", icon: CurrencyCircleDollar, barbero: true },
     { id: "qr", label: "Mi QR", icon: QrCode, barbero: true },
+    { id: "personalizacion", label: "Personalización", icon: Palette, barbero: true },
     { id: "ajustes", label: "Ajustes", icon: GearSix, barbero: true },
   ].filter((it) => (esBarbero ? it.barbero : true))
 
