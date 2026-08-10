@@ -20,11 +20,14 @@ export function StoreProvider({ children }) {
   const [turnos, setTurnos] = useState([])
   const [ventas, setVentas] = useState([])
   const [qrStats, setQrStats] = useState([])
-  const [preferencias, setPreferencias] = useState({ horasRecordatorio: 2, whatsappNumero: "" })
+  const [preferencias, setPreferencias] = useState({ horasRecordatorio: 2, whatsappNumero: "", pagoEfectivo: true, pagoTransferencia: false, pagoMp: false })
+  const [datosPago, setDatosPago] = useState({ efectivo: true, transferencia: false, mp: false, mpConfigurado: false, transferenciaNegocio: null, barberos: [] })
   const [slotsHorario, setSlotsHorario] = useState([])
+  const [galeria, setGaleria] = useState([])
   const [cargando, setCargando] = useState(true)
   const [error, setError] = useState(null)
   const [view, setView] = useState("dashboard")
+  const [recuperando, setRecuperando] = useState(false)
 
   const enCargandoRef = useRef(null)
 
@@ -42,25 +45,35 @@ export function StoreProvider({ children }) {
     setTurnos([])
     setVentas([])
     setQrStats([])
-    setPreferencias({ horasRecordatorio: 2, whatsappNumero: "" })
+    setPreferencias({ horasRecordatorio: 2, whatsappNumero: "", pagoEfectivo: true, pagoTransferencia: false, pagoMp: false })
+    setDatosPago({ efectivo: true, transferencia: false, mp: false, mpConfigurado: false, transferenciaNegocio: null, barberos: [] })
     setSlotsHorario([])
+    setGaleria([])
     setCargando(true)
     setError(null)
   }, [setSesion])
 
+  const cargarDatosPago = useCallback(async (negocioId) => {
+    if (!negocioId) return
+    const { data, error } = await supabase.rpc("datos_pago", { p_negocio: negocioId })
+    if (!error && data) setDatosPago(data)
+  }, [])
+
   const cargarTenant = useCallback(async (negocioId, conPref = true) => {
     setCargando(true); setError(null)
     try {
-      const [emps, srvs, trns, vts, clts, slots, pref] = await Promise.all([
+      const [emps, srvs, trns, vts, clts, slots, qr, pref, gal] = await Promise.all([
         supabase.from("empleados").select("*").eq("negocio_id", negocioId).order("created_at"),
         supabase.from("servicios").select("*").eq("negocio_id", negocioId).order("created_at"),
         supabase.from("turnos").select("*").eq("negocio_id", negocioId).order("fecha", { ascending: false }),
         supabase.from("ventas").select("*").eq("negocio_id", negocioId).order("fecha_hora", { ascending: false }),
         supabase.from("clientes").select("*").eq("negocio_id", negocioId).order("created_at"),
         supabase.from("slots_horario").select("*").eq("negocio_id", negocioId).order("hora"),
+        supabase.from("qr_stats").select("*").eq("negocio_id", negocioId).order("fecha_hora", { ascending: false }),
         conPref ? supabase.from("preferencias").select("*").eq("negocio_id", negocioId).maybeSingle() : Promise.resolve({ data: null, error: null }),
+        supabase.from("galeria").select("*").eq("negocio_id", negocioId).order("orden"),
       ])
-      const firstErr = [emps, srvs, trns, vts, clts, slots, pref].find((r) => r.error)
+      const firstErr = [emps, srvs, trns, vts, clts, slots, qr, pref, gal].find((r) => r.error)
       if (firstErr) throw firstErr.error
       setEmpleados(mapaDe(emps.data))
       setServicios(mapaDe(srvs.data))
@@ -68,13 +81,16 @@ export function StoreProvider({ children }) {
       setVentas(mapaDe(vts.data))
       setClientes(mapaDe(clts.data))
       setSlotsHorario((slots.data || []).map((s) => leerHora(s.hora)))
-      setPreferencias(pref?.data ? filaA(pref.data) : { horasRecordatorio: 2, whatsappNumero: negocio?.telefono || "" })
+      setGaleria(mapaDe(gal.data).sort((a, b) => (a.orden ?? 0) - (b.orden ?? 0)))
+      setQrStats(mapaDe(qr.data))
+      setPreferencias(pref?.data ? filaA(pref.data) : { horasRecordatorio: 2, whatsappNumero: negocio?.telefono || "", pagoEfectivo: true, pagoTransferencia: false, pagoMp: false })
+      await cargarDatosPago(negocioId)
       setCargando(false)
     } catch (e) {
       setError(e?.message || "Error al cargar")
       setCargando(false)
     }
-  }, [negocio?.telefono])
+  }, [negocio?.telefono, cargarDatosPago])
 
   const horariosOcupados = useCallback(async (fecha, empleadoId) => {
     if (!negocio?.id) return []
@@ -121,22 +137,24 @@ export function StoreProvider({ children }) {
 
   useEffect(() => {
     let activo = true
-    supabase.auth.getSession().then(({ data }) => {
-      if (!activo) return
-      if (data.session?.user) lazyPerfil(data.session.user.id)
-      else { setSesion(null); setCargando(false) }
-    })
-    const { data: sub } = supabase.auth.onAuthStateChange((evento) => {
+    const urlRecovery = typeof window !== "undefined" && (/type=recovery/.test(window.location.hash) || /type=recovery/.test(window.location.search))
+    if (urlRecovery) setRecuperando(true)
+    const { data: authSub } = supabase.auth.onAuthStateChange((evento) => {
       if (!activo) return
       if (evento === "SIGNED_OUT") limpiarEstado()
+      else if (evento === "PASSWORD_RECOVERY") setRecuperando(true)
       else if (evento === "SIGNED_IN" || evento === "TOKEN_REFRESHED" || evento === "INITIAL_SESSION") {
         supabase.auth.getUser().then(({ data }) => {
           if (activo && data.user) cargarPerfil(data.user.id)
         })
       }
     })
-    const subscription = sub?.subscription
-    return () => { activo = false; subscription?.unsubscribe() }
+    supabase.auth.getSession().then(({ data }) => {
+      if (!activo) return
+      if (data.session?.user) lazyPerfil(data.session.user.id)
+      else { setSesion(null); setCargando(false) }
+    })
+    return () => { activo = false; authSub?.subscription?.unsubscribe?.() }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
@@ -185,30 +203,35 @@ export function StoreProvider({ children }) {
       usuario_auth: uid,
     })
     if (e2) throw e2
-    await cargarPerfil(uid)
+    const haySesion = Boolean(data.session)
+    if (haySesion) await cargarPerfil(uid)
+    return { cuenta: uid, sesion: haySesion }
   }, [cargarPerfil])
 
   const activarPorSlug = useCallback(async (slug) => {
     setCargando(true); setError(null)
     try {
       const { data } = await supabase.from("negocios").select("*").eq("slug", slug).maybeSingle()
-      if (!data) { setError("Barbería no encontrada"); setCargando(false); return null }
+      if (!data) { setNegocio(null); setServicios([]); setEmpleados([]); setSlotsHorario([]); setGaleria([]); setError("Barbería no encontrada"); setCargando(false); return null }
       const yaAutenticado = session?.rol && session.rol !== "anon"
       if (!yaAutenticado) setSesion({ usuarioId: null, rol: "anon", negocioId: data.id, empleadoId: null, barberoId: null })
       setNegocio(filaA(data))
-      const [srvs, emps, slots] = await Promise.all([
+      const [srvs, emps, slots, gal] = await Promise.all([
         supabase.from("servicios").select("*").eq("negocio_id", data.id).order("created_at"),
         supabase.from("empleados").select("id, negocio_id, nombre").eq("negocio_id", data.id).order("created_at"),
         supabase.from("slots_horario").select("*").eq("negocio_id", data.id).order("hora"),
+        supabase.from("galeria").select("*").eq("negocio_id", data.id).order("orden"),
       ])
       setServicios(mapaDe(srvs.data))
       setEmpleados(mapaDe(emps.data))
       setSlotsHorario((slots.data || []).map((s) => leerHora(s.hora)))
+      setGaleria(mapaDe(gal.data).sort((a, b) => (a.orden ?? 0) - (b.orden ?? 0)))
       if (session?.rol === "dueno" || session?.rol === "barbero") {
         await cargarTenant(data.id)
       } else {
         setTurnos([]); setVentas([]); setClientes([]); setQrStats([])
-        setPreferencias({ horasRecordatorio: 2, whatsappNumero: data?.telefono || "" })
+        setPreferencias({ horasRecordatorio: 2, whatsappNumero: data?.telefono || "", pagoEfectivo: true, pagoTransferencia: false, pagoMp: false })
+        await cargarDatosPago(data.id)
         setCargando(false)
       }
       return data
@@ -233,7 +256,6 @@ export function StoreProvider({ children }) {
   const tomarCita = useCallback(async ({ servicioId, fecha, hora, empleadoId, metodoPago, nombre, telefono }) => {
     const nid = negocio?.id
     if (!nid) throw new Error("Negocio no cargado")
-    const pendiente = metodoPago === "En línea"
     const { data: rpc, error } = await supabase.rpc("reservar_turno", {
       p_negocio: nid,
       p_nombre: nombre,
@@ -243,7 +265,7 @@ export function StoreProvider({ children }) {
       p_empleado: empleadoId || null,
       p_fecha: fecha,
       p_hora: hora,
-      p_pendiente: pendiente,
+      p_metodo_pago: metodoPago || null,
     })
     if (error) throw error
     await refrescar(nid)
@@ -286,8 +308,8 @@ export function StoreProvider({ children }) {
     const { data, error } = await supabase.from("ventas").insert({
       ...frontAFila("ventas", venta),
       negocio_id: nid,
-      pagado: venta.pagado ?? true,
-      pendiente_pago: false,
+      pagado: venta.pagado ?? venta.metodo !== "Mercado Pago",
+      pendiente_pago: venta.pendientePago ?? venta.metodo === "Mercado Pago",
     }).select("*").single()
     if (error) throw error
     setVentas((prev) => [filaA(data), ...prev])
@@ -335,9 +357,30 @@ export function StoreProvider({ children }) {
       negocio_id: nid,
       horas_recordatorio: patch.horasRecordatorio ?? preferencias.horasRecordatorio,
       whatsapp_numero: patch.whatsappNumero ?? preferencias.whatsappNumero,
+      pago_efectivo: patch.pagoEfectivo ?? preferencias.pagoEfectivo ?? true,
+      pago_transferencia: patch.pagoTransferencia ?? preferencias.pagoTransferencia ?? false,
+      pago_mp: patch.pagoMp ?? preferencias.pagoMp ?? false,
+      transferencias_banco: patch.transferenciasBanco ?? preferencias.transferenciasBanco ?? null,
+      transferencias_tipo_cuenta: patch.transferenciasTipoCuenta ?? preferencias.transferenciasTipoCuenta ?? null,
+      transferencias_numero: patch.transferenciasNumero ?? preferencias.transferenciasNumero ?? null,
+      transferencias_rut: patch.transferenciasRut ?? preferencias.transferenciasRut ?? null,
+      transferencias_titular: patch.transferenciasTitular ?? preferencias.transferenciasTitular ?? null,
       updated_at: new Date().toISOString(),
     })
-  }, [negocio?.id, preferencias])
+    await cargarDatosPago(nid)
+  }, [negocio?.id, preferencias, cargarDatosPago])
+
+  const guardarCredencialesMp = useCallback(async ({ negocioId, publicKey, accessToken }) => {
+    const nid = negocioId || negocio?.id
+    if (!nid) return
+    await supabase.from("mp_credenciales").upsert({
+      negocio_id: nid,
+      mp_public_key: publicKey,
+      mp_access_token: accessToken,
+      updated_at: new Date().toISOString(),
+    })
+    await cargarDatosPago(nid)
+  }, [negocio?.id, cargarDatosPago])
 
   const updateSlotsHorario = useCallback(async (slots) => {
     const nid = negocio?.id
@@ -347,6 +390,18 @@ export function StoreProvider({ children }) {
     if (slots.length) {
       await supabase.from("slots_horario").insert(slots.map((h) => ({ negocio_id: nid, hora: h })))
     }
+  }, [negocio?.id])
+
+  const guardarGaleria = useCallback(async (urls) => {
+    const nid = negocio?.id
+    if (!nid) return
+    await supabase.from("galeria").delete().eq("negocio_id", nid)
+    if (urls.length) {
+      await supabase.from("galeria").insert(
+        urls.map((url, i) => ({ negocio_id: nid, url, orden: i }))
+      )
+    }
+    setGaleria(urls.map((url, i) => ({ id: `tmp-${i}`, url, orden: i })))
   }, [negocio?.id])
 
   const addCliente = useCallback(async (cliente) => {
@@ -415,11 +470,38 @@ export function StoreProvider({ children }) {
 
   const addUsuario = useCallback(async (u) => u, [])
   const updateUsuario = useCallback(async () => {}, [])
-  const resetearClave = useCallback(() => "Pide a tu barbero usar «Olvidé mi contraseña» en el login", [])
+  const resetearClave = useCallback(() => "El barbero puede usar «Olvidé mi contraseña» en la pantalla de iniciar sesión", [])
 
-  const generarLinkPago = useCallback((monto, concepto) => {
-    const ref = `MP-${Date.now()}`
-    return { ref, url: `https://mp.la/${ref}`, monto, concepto }
+  const recuperarClave = useCallback(async (email) => {
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}${window.location.pathname}`,
+    })
+    if (error) throw error
+  }, [])
+
+  const actualizarClave = useCallback(async (password) => {
+    const { error } = await supabase.auth.updateUser({ password })
+    if (error) throw error
+    setRecuperando(false)
+  }, [])
+
+  const finRecuperacion = useCallback(async () => {
+    await supabase.auth.signOut()
+    setRecuperando(false)
+  }, [])
+
+  const generarLinkPago = useCallback(async ({ negocioId, ventaId, monto, concepto, returnUrl }) => {
+    if (!negocioId || !ventaId) throw new Error("Falta información para generar el pago")
+    const { data, error } = await supabase.functions.invoke("mp-checkout", {
+      body: { negocio_id: negocioId, venta_id: ventaId, monto, concepto, return_url: returnUrl || window.location.href },
+    })
+    if (error) {
+      const msg = error.message || error.context?.message || "No se pudo generar el pago en línea"
+      throw new Error(String(msg).replace(/^functions\/invoke error on edge function mp-checkout[: ]*/i, ""))
+    }
+    if (data?.error) throw new Error(data.error)
+    if (!data?.init_point) throw new Error("Mercado Pago no devolvió un link de pago")
+    return data
   }, [])
 
   const negocioId = session?.negocioId || negocio?.id || null
@@ -443,6 +525,7 @@ export function StoreProvider({ children }) {
     qrStats,
     preferencias,
     slotsHorario,
+    galeria,
     login,
     logout,
     activarPorSlug,
@@ -450,6 +533,7 @@ export function StoreProvider({ children }) {
     updateNegocio,
     updatePreferencias,
     updateSlotsHorario,
+    guardarGaleria,
     addVenta,
     addTurno,
     setTurnoEstado,
@@ -468,8 +552,15 @@ export function StoreProvider({ children }) {
     addUsuario,
     updateUsuario,
     resetearClave,
+    recuperando,
+    recuperarClave,
+    actualizarClave,
+    finRecuperacion,
     horariosOcupados,
     cargarTenant,
+    datosPago,
+    cargarDatosPago,
+    guardarCredencialesMp,
   }
 
   return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>
