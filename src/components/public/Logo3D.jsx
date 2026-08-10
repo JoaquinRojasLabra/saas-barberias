@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react"
 import * as THREE from "three"
 
-export default function Logo3D({ seed = 0, size = 160 }) {
+export default function Logo3D({ seed = 0, size = 160, color }) {
   const mountRef = useRef(null)
 
   useEffect(() => {
@@ -16,7 +16,7 @@ export default function Logo3D({ seed = 0, size = 160 }) {
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
     mount.appendChild(renderer.domElement)
 
-    const accent = getComputedStyle(document.documentElement).getPropertyValue("--accent").trim() || "#0e7490"
+    const accent = color || getComputedStyle(document.documentElement).getPropertyValue("--accent").trim() || "#0e7490"
     const geo = new THREE.IcosahedronGeometry(1.4, 1)
     const mat = new THREE.MeshStandardMaterial({
       color: accent,
@@ -53,7 +53,7 @@ export default function Logo3D({ seed = 0, size = 160 }) {
       geo.dispose()
       mat.dispose()
     }
-  }, [size, seed])
+  }, [size, seed, color])
 
   return <div ref={mountRef} style={{ width: size, height: size }} aria-hidden />
 }

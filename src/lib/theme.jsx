@@ -4,13 +4,13 @@ import { useStore } from "@/context/store"
 export const THEMES = [
   { id: "elegante", label: "Elegante" },
   { id: "noir", label: "Noir" },
-  { id: "glass", label: "Glass" },
   { id: "clay", label: "Clay" },
   { id: "brutal", label: "Brutal" },
   { id: "minimal", label: "Minimal" },
   { id: "fintech", label: "Fintech" },
   { id: "barbero", label: "Barbero" },
   { id: "emerald", label: "Emerald" },
+  { id: "apple", label: "Apple" },
 ]
 
 const ThemeContext = createContext()
@@ -21,13 +21,14 @@ const esTemaValido = (t) =>
 export function ThemeProvider({ children }) {
   const { negocio, updateNegocio } = useStore()
   const [theme, setThemeState] = useState(() => {
-    let inicial
-    try {
-      inicial = localStorage.getItem("saas-barberias:theme")
-    } catch {
-      inicial = null
+    let inicial = negocio?.tema
+    if (!esTemaValido(inicial)) {
+      try {
+        inicial = localStorage.getItem("saas-barberias:theme")
+      } catch {
+        inicial = null
+      }
     }
-    if (!esTemaValido(inicial)) inicial = negocio?.tema
     return esTemaValido(inicial) ? inicial : "elegante"
   })
   const themeRef = useRef(theme)
@@ -38,8 +39,16 @@ export function ThemeProvider({ children }) {
     if (themeRef.current === t) return
     updateNegocio({ tema: t })
     setThemeState(t)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, [updateNegocio])
+
+  // La barbería manda: si el negocio tiene un tema válido, se aplica siempre
+  // (incluso si el navegador conserva otro de sesiones previas) y se persiste.
+  // El selector del panel/Ajustes lo cambia guardándolo vía updateNegocio.
+  useEffect(() => {
+    if (esTemaValido(negocio?.tema) && negocio.tema !== themeRef.current) {
+      setThemeState(negocio.tema)
+    }
+  }, [negocio?.tema])
 
   useEffect(() => {
     const root = document.documentElement
@@ -51,6 +60,20 @@ export function ThemeProvider({ children }) {
       /* ignorar */
     }
   }, [theme])
+
+  // Color de marca: override global de --accent/--accent-2 desde el negocio.
+  // Color vacío o inválido => vuelve al token del tema base.
+  useEffect(() => {
+    const root = document.documentElement
+    const ac = negocio?.accentColor
+    if (ac && /^#[0-9a-fA-F]{3,8}$/.test(ac)) {
+      root.style.setProperty("--accent", ac)
+      root.style.setProperty("--accent-2", ac)
+    } else {
+      root.style.removeProperty("--accent")
+      root.style.removeProperty("--accent-2")
+    }
+  }, [negocio?.accentColor])
 
   const value = useMemo(() => ({ theme, setTheme, THEMES }), [theme, setTheme])
 
