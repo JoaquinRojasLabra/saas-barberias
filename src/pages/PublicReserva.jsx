@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
 import { motion } from "framer-motion"
-import { ArrowLeft, ArrowRight, Check, Clock, Scissors } from "@phosphor-icons/react"
+import { ArrowLeft, ArrowRight, Check, Clock, Scissors, Copy, Bank } from "@phosphor-icons/react"
 import { useStore } from "@/context/store"
 import { useTheme } from "@/lib/theme"
 import { useToast } from "@/lib/toast"
@@ -10,10 +10,9 @@ import Background from "@/components/Background"
 
 const pasosLabel = ["Servicio", "Horario", "Tus datos", "Confirmar"]
 const MAX = pasosLabel.length - 1
-const METODOS = ["En la barbería", "En línea"]
 
 export default function PublicReserva({ slug }) {
-  const { negocio, servicios, empleados, slotsHorario, tomarCita, horariosOcupados, activarPorSlug } = useStore()
+  const { negocio, servicios, empleados, slotsHorario, tomarCita, horariosOcupados, activarPorSlug, datosPago, generarLinkPago } = useStore()
   const { setTheme } = useTheme()
   const push = useToast()
   const [paso, setPaso] = useState(0)
@@ -23,13 +22,39 @@ export default function PublicReserva({ slug }) {
   const [hora, setHora] = useState("")
   const [nombre, setNombre] = useState("")
   const [telefono, setTelefono] = useState("")
-  const [metodo, setMetodo] = useState(METODOS[0])
   const [ocupadas, setOcupadas] = useState([])
   const [guardando, setGuardando] = useState(false)
 
   const slugActual = slug || slugDe(window.location.hash)
   const servicio = servicios.find((s) => s.id === servicioId)
   const empleado = empleados.find((e) => e.id === empleadoId)
+
+  const datosTransferencia = empleadoId
+    ? (datosPago?.barberos || []).find((b) => b.id === empleadoId)?.transferencias || null
+    : datosPago?.transferenciaNegocio || null
+
+  const copiarDatos = async () => {
+    const d = datosTransferencia
+    if (!d) return
+    const texto = `${d.banco} · ${d.tipoCuenta} · ${d.numero} · ${d.rut || ""} · ${d.titular || ""}`.replace(/\s+/g, " ").trim()
+    try {
+      await navigator.clipboard.writeText(texto)
+      push("Datos copiados al portapapeles")
+    } catch {
+      push("No se pudo copiar", "error")
+    }
+  }
+
+  const metodos = []
+  if (datosPago?.efectivo !== false) metodos.push({ id: "efectivo", label: "En la barbería" })
+  if (datosPago?.transferencia) metodos.push({ id: "transferencia", label: "Transferencia" })
+  if (datosPago?.mp && datosPago?.mpConfigurado) metodos.push({ id: "mercadopago", label: "Mercado Pago" })
+  const [metodo, setMetodo] = useState(metodos[0]?.id || "efectivo")
+
+  useEffect(() => {
+    if (!metodos.some((m) => m.id === metodo)) setMetodo(metodos[0]?.id || "efectivo")
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [datosPago?.efectivo, datosPago?.transferencia, datosPago?.mp, datosPago?.mpConfigurado])
 
   useEffect(() => {
     if (slugActual) activarPorSlug(slugActual)
@@ -51,13 +76,30 @@ export default function PublicReserva({ slug }) {
   const confirmar = async () => {
     setGuardando(true)
     try {
-      const metodoPago = metodo === "En línea" ? "En línea" : null
-      await tomarCita({ nombre: nombre.trim(), telefono: telefono.trim(), servicioId, fecha, hora, empleadoId, metodoPago })
-      push(metodoPago === "En línea" ? "Reserva creada. Se generó un pago en línea pendiente." : "¡Cita confirmada! Te esperamos.")
+      const metodoPago = metodo === "efectivo" ? null : metodo === "transferencia" ? "Transferencia" : "Mercado Pago"
+      const res = await tomarCita({ nombre: nombre.trim(), telefono: telefono.trim(), servicioId, fecha, hora, empleadoId, metodoPago })
+      if (metodo === "mercadopago") {
+        try {
+          const link = await generarLinkPago({
+            negocioId: negocio?.id,
+            ventaId: res?.venta_id,
+            monto: servicio?.precio,
+            concepto: servicio?.nombre,
+          })
+          push("Pago en línea generado. Te redirigimos a Mercado Pago.")
+          window.location.assign(link.init_point)
+          return
+        } catch (e) {
+          push(`Reserva creada, pero no se pudo generar el pago: ${e?.message || "intenta de nuevo"}. Podrás pagar en la barbería.`)
+          navegarA(`/c/${slugActual}`)
+          return
+        }
+      }
+      setGuardando(false)
+      push(metodoPago === "Transferencia" ? "Reserva creada. Te enviamos los datos para transferir." : "¡Cita confirmada! Te esperamos.")
       navegarA(`/c/${slugActual}`)
     } catch (e) {
       push((e?.message || "No se pudo reservar. Intenta de nuevo.").replace(/^RPC exception on /, ""), "error")
-    } finally {
       setGuardando(false)
     }
   }
@@ -219,25 +261,55 @@ export default function PublicReserva({ slug }) {
             <div>
               <p className="text-xs font-semibold text-[var(--fg-muted)] uppercase tracking-wider mb-2">Cómo pagarás</p>
               <div className="grid grid-cols-2 gap-2">
-                {METODOS.map((m) => {
-                  const sel = metodo === m
+                {metodos.map((m) => {
+                  const sel = metodo === m.id
                   return (
                     <motion.button
-                      key={m}
+                      key={m.id}
                       type="button"
                       whileTap={{ scale: 0.95 }}
-                      onClick={() => setMetodo(m)}
+                      onClick={() => setMetodo(m.id)}
                       className={`px-3 py-2.5 rounded-xl text-sm font-semibold border transition-colors ${sel ? selClase : noSelClase} border-[var(--border)]`}
                     >
-                      {m === "En línea" ? "Pago en línea" : "En la barbería"}
+                      {m.label}
                     </motion.button>
                   )
                 })}
               </div>
-              {metodo === "En línea" && (
-                <p className="text-xs text-[var(--fg-muted)] flex items-center gap-1.5 bg-[var(--bg-card)] border border-[var(--border)] rounded-xl px-3 py-2.5">
-                  <Check size={14} className="text-[var(--accent)]" /> Reservas tu cupo y generas un pago en línea. Podrás confirmarlo después.
+
+              {metodo === "mercadopago" && (
+                <p className="mt-2 text-xs text-[var(--fg-muted)] flex items-center gap-1.5 bg-[var(--bg-card)] border border-[var(--border)] rounded-xl px-3 py-2.5">
+                  <Check size={14} className="text-[var(--accent)]" /> Reservas tu cupo y lo pagas con Mercado Pago. Te redirigimos al pago al confirmar.
                 </p>
+              )}
+
+              {metodo === "transferencia" && (
+                <div className="mt-2 space-y-2 bg-[var(--bg-card)] border border-[var(--border)] rounded-xl p-3">
+                  <p className="text-xs font-semibold flex items-center gap-1.5 text-[var(--fg-muted)] uppercase tracking-wide">
+                    <Bank size={14} className="text-[var(--accent)]" /> {datosTransferencia ? (empleado ? `Datos de ${empleado.nombre}` : "Datos del negocio") : "Transferencia"}
+                  </p>
+                  {datosTransferencia ? (
+                    <>
+                      <dl className="text-xs space-y-1">
+                        <Row k="Banco" v={datosTransferencia.banco} />
+                        <Row k="Tipo de cuenta" v={datosTransferencia.tipoCuenta} />
+                        <Row k="N° de cuenta" v={datosTransferencia.numero} />
+                        {datosTransferencia.rut && <Row k="RUT" v={datosTransferencia.rut} />}
+                        {datosTransferencia.titular && <Row k="Titular" v={datosTransferencia.titular} />}
+                      </dl>
+                      <div className="flex gap-2">
+                        <button onClick={copiarDatos} className="flex-1 inline-flex items-center justify-center gap-1.5 text-xs font-semibold bg-[var(--accent)] text-white px-3 py-2 rounded-lg">
+                          <Copy size={13} weight="bold" /> Copiar
+                        </button>
+                        <a href={`https://wa.me/${String(negocio?.telefono || "").replace(/\D/g, "")}?text=${encodeURIComponent(`Hola ${empleado?.nombre || negocio?.nombre || ""}, reservé una hora y quiero pagar por transferencia.`)}`} target="_blank" rel="noreferrer" className="flex-1 inline-flex items-center justify-center gap-1.5 text-xs font-semibold surface px-3 py-2 rounded-lg">
+                          Enviar por WhatsApp
+                        </a>
+                      </div>
+                    </>
+                  ) : (
+                    <p className="text-xs text-[var(--fg-muted)]">Paga en la barbería y elige tu método al llegar.</p>
+                  )}
+                </div>
               )}
             </div>
           </>
@@ -270,6 +342,15 @@ export default function PublicReserva({ slug }) {
           )}
         </div>
       </motion.section>
+    </div>
+  )
+}
+
+function Row({ k, v }) {
+  return (
+    <div className="flex justify-between gap-3">
+      <dt className="text-[var(--fg-muted)]">{k}</dt>
+      <dd className="font-semibold text-right">{v || "—"}</dd>
     </div>
   )
 }

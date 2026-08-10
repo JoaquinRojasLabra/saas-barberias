@@ -2,13 +2,12 @@
 import { QRCodeSVG } from "qrcode.react"
 import { QrCode, Eye, ArrowSquareOut } from "@phosphor-icons/react"
 import { useStore } from "@/context/store"
-import { formatCLP } from "@/lib/format"
 import { navegarA } from "@/lib/router"
 
 export default function QR() {
   const { negocio, qrStats } = useStore()
-  // scans may carry an optional monto (a scan is not a sale)
-  const total = qrStats.reduce((s, q) => s + (q.monto || 0), 0)
+  const fechaCorte = new Date(Date.now() - 7 * 86400000).toISOString()
+  const estaSemana = qrStats.filter((q) => (q.fechaHora || "") >= fechaCorte).length
   const publicUrl = `${window.location.origin}${window.location.pathname}#/c/${negocio.slug}?tema=${negocio.tema || "elegante"}`
 
   return (
@@ -50,8 +49,8 @@ export default function QR() {
           </div>
           <div className="flex items-center justify-between surface px-4 py-3">
             <div>
-              <p className="text-xs text-[var(--fg-muted)]">Ventas por QR</p>
-              <p className="text-2xl font-extrabold">{formatCLP(total)}</p>
+              <p className="text-xs text-[var(--fg-muted)]">Esta semana</p>
+              <p className="text-2xl font-extrabold">{estaSemana}</p>
             </div>
             <Eye size={24} weight="duotone" className="text-[var(--accent)]" />
           </div>

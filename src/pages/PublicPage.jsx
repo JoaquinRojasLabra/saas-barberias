@@ -19,7 +19,7 @@ const iconoDeServicio = (nombre) => {
 }
 
 export default function PublicPage({ slug }) {
-  const { negocio, servicios, empleados, activarPorSlug } = useStore()
+  const { negocio, servicios, empleados, activarPorSlug, error } = useStore()
   const { theme, setTheme } = useTheme()
 
   useEffect(() => {
@@ -31,6 +31,24 @@ export default function PublicPage({ slug }) {
     const { tema } = parametrosDe(query)
     setTheme(tema || negocio?.tema || "elegante")
   }, [negocio?.tema, setTheme])
+
+  if (!negocio && error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-6 relative">
+        <Background />
+        <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="relative z-10 text-center space-y-4 max-w-sm">
+          <span className="mx-auto flex items-center justify-center w-14 h-14 rounded-2xl bg-[var(--accent)] text-white">
+            <Scissors size={28} weight="duotone" />
+          </span>
+          <h1 className="font-display text-2xl font-black tracking-tight">Barbería no encontrada</h1>
+          <p className="text-sm text-[var(--fg-muted)]">Revisa el enlace o escanea nuevamente el QR.</p>
+          <button onClick={() => navegarA("/")} className="inline-flex items-center gap-2 bg-[var(--accent)] text-white text-sm font-semibold px-5 py-2.5 rounded-xl">
+            Ir al inicio
+          </button>
+        </motion.div>
+      </div>
+    )
+  }
 
   return (
     <div key={theme} className="min-h-screen text-[var(--fg)] relative overflow-hidden">
