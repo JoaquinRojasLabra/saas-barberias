@@ -25,3 +25,6 @@ dist-ssr
 
 .vercel
 devlog.txt
+
+# Brainstorm visual companion sessions (local only)
+.superpowers/
