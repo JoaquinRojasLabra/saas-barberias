@@ -6,6 +6,7 @@ import { useTheme } from "@/lib/theme"
 import { useToast } from "@/lib/toast"
 import { formatCLP, hoyKey } from "@/lib/format"
 import { navegarA, slugDe, leerRuta, parametrosDe } from "@/lib/router"
+import Logo3D from "@/components/public/Logo3D"
 import Background from "@/components/Background"
 
 const pasosLabel = ["Servicio", "Horario", "Tus datos", "Confirmar"]
@@ -121,6 +122,20 @@ export default function PublicReserva({ slug }) {
       <button onClick={() => navegarA(`/c/${slug}`)} className="inline-flex items-center gap-1 text-xs text-[var(--fg-muted)] hover:text-[var(--fg)]">
         <ArrowLeft size={14} /> Volver a la barbería
       </button>
+
+      <div className="mt-4 flex items-center gap-3 surface rounded-2xl p-3">
+        {negocio?.logoTipo === "imagen" && negocio?.logoUrl ? (
+          <img src={negocio.logoUrl} alt={negocio?.nombre || "Logo"} className="w-12 h-12 rounded-xl object-cover" />
+        ) : (
+          <Logo3D size={48} color={negocio?.accentColor || undefined} />
+        )}
+        <div className="min-w-0">
+          <p className="text-sm font-bold truncate">{negocio?.nombre || "Mi Barbería"}</p>
+          <p className="text-xs text-[var(--fg-muted)] truncate">
+            {[negocio?.ciudad, negocio?.telefono].filter(Boolean).join(" · ")}
+          </p>
+        </div>
+      </div>
 
       <div className="flex gap-1.5 mt-4">
         {pasosLabel.map((t, i) => (
