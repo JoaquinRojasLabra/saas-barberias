@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect, useMemo, useCallback, useRef } from "react"
-import { supabase } from "@/lib/supabase"
+import { supabase, supabasePublic } from "@/lib/supabase"
 import { filaAFront, frontAFila, mapaDe } from "@/lib/mapos"
 
 const filaA = filaAFront
@@ -256,7 +256,7 @@ export function StoreProvider({ children }) {
   const tomarCita = useCallback(async ({ servicioId, fecha, hora, empleadoId, metodoPago, nombre, telefono }) => {
     const nid = negocio?.id
     if (!nid) throw new Error("Negocio no cargado")
-    const { data: rpc, error } = await supabase.rpc("reservar_turno", {
+    const { data: rpc, error } = await supabasePublic.rpc("reservar_turno", {
       p_negocio: nid,
       p_nombre: nombre,
       p_whatsapp: telefono || null,
