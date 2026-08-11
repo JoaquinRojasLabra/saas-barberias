@@ -373,12 +373,11 @@ export function StoreProvider({ children }) {
   const guardarCredencialesMp = useCallback(async ({ negocioId, publicKey, accessToken }) => {
     const nid = negocioId || negocio?.id
     if (!nid) return
-    await supabase.from("mp_credenciales").upsert({
-      negocio_id: nid,
-      mp_public_key: publicKey,
-      mp_access_token: accessToken,
-      updated_at: new Date().toISOString(),
+    const { error } = await supabase.rpc("guardar_credenciales_mp", {
+      p_public_key: publicKey,
+      p_access_token: accessToken,
     })
+    if (error) throw new Error(error.message)
     await cargarDatosPago(nid)
   }, [negocio?.id, cargarDatosPago])
 

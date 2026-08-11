@@ -30,9 +30,8 @@ export default function PublicReserva({ slug }) {
   const servicio = servicios.find((s) => s.id === servicioId)
   const empleado = empleados.find((e) => e.id === empleadoId)
 
-  const datosTransferencia = empleadoId
-    ? (datosPago?.barberos || []).find((b) => b.id === empleadoId)?.transferencias || null
-    : datosPago?.transferenciaNegocio || null
+  const datosBarbero = empleadoId ? (datosPago?.barberos || []).find((b) => b.id === empleadoId)?.transferencias || null : null
+  const datosTransferencia = (empleadoId ? datosBarbero : null) || datosPago?.transferenciaNegocio || null
 
   const copiarDatos = async () => {
     const d = datosTransferencia
@@ -301,7 +300,7 @@ export default function PublicReserva({ slug }) {
               {metodo === "transferencia" && (
                 <div className="mt-2 space-y-2 bg-[var(--bg-card)] border border-[var(--border)] rounded-xl p-3">
                   <p className="text-xs font-semibold flex items-center gap-1.5 text-[var(--fg-muted)] uppercase tracking-wide">
-                    <Bank size={14} className="text-[var(--accent)]" /> {datosTransferencia ? (empleado ? `Datos de ${empleado.nombre}` : "Datos del negocio") : "Transferencia"}
+                    <Bank size={14} className="text-[var(--accent)]" /> {datosTransferencia ? (datosBarbero ? `Datos de ${empleado?.nombre}` : "Datos del negocio") : "Transferencia"}
                   </p>
                   {datosTransferencia ? (
                     <>
