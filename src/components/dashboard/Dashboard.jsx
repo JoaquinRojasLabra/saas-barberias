@@ -27,24 +27,32 @@ export default function Dashboard() {
   const { turnos, ventas } = scope
   const hoy = hoyKey()
 
-  const resumen = useMemo(() => {
-    const ventasHoy = ventas.filter((v) => v.fechaHora?.startsWith(hoy))
-    const totalHoy = ventasHoy.reduce((acc, v) => acc + v.monto, 0)
-    const turnosHoy = turnos.filter((t) => t.fecha === hoy)
-    const noLlego = turnosHoy.filter((t) => t.estado === "no-llego").length
-    const metaDia = 60000
-    return { totalHoy, noLlego, turnosHoy: turnosHoy.length, escaneos: qrStats.length, metaDia }
-  }, [ventas, turnos, qrStats, hoy])
-
   const semana = useMemo(() => {
     const dias = diasSemana(hoy)
     return dias.map((d) => ({
       day: d.nombre,
       value: ventas
-        .filter((v) => v.fechaHora?.startsWith(d.key))
+        .filter((v) => v.fechaHora?.startsWith(d.key) && !v.pendientePago)
         .reduce((acc, v) => acc + v.monto, 0),
     }))
   }, [ventas, hoy])
+
+  const metaDia = useMemo(() => {
+    const conVentas = semana.filter((d) => d.value > 0)
+    if (conVentas.length === 0) return 0
+    const prom = conVentas.reduce((acc, d) => acc + d.value, 0) / conVentas.length
+    return Math.round(prom / 1000) * 1000
+  }, [semana])
+
+  const resumen = useMemo(() => {
+    const ventasHoy = ventas.filter((v) => v.fechaHora?.startsWith(hoy) && !v.pendientePago)
+    const totalHoy = ventasHoy.reduce((acc, v) => acc + v.monto, 0)
+    const turnosHoy = turnos.filter((t) => t.fecha === hoy && t.estado !== "cancelado")
+    const noLlego = turnosHoy.filter((t) => t.estado === "no-llego").length
+    const fechaCorte = new Date(Date.now() - 7 * 86400000).toISOString()
+    const escaneos = qrStats.filter((q) => (q.fechaHora || "") >= fechaCorte).length
+    return { totalHoy, noLlego, turnosHoy: turnosHoy.length, escaneos, metaDia }
+  }, [ventas, turnos, qrStats, hoy, metaDia])
 
   const barberoNombre = empleados.find((e) => e.id === session?.barberoId)?.nombre || "barbero"
 

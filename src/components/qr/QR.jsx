@@ -8,7 +8,7 @@ export default function QR() {
   const { negocio, qrStats } = useStore()
   const fechaCorte = new Date(Date.now() - 7 * 86400000).toISOString()
   const estaSemana = qrStats.filter((q) => (q.fechaHora || "") >= fechaCorte).length
-  const publicUrl = `${window.location.origin}${window.location.pathname}#/c/${negocio.slug}?tema=${negocio.tema || "elegante"}`
+  const publicUrl = `${window.location.origin}${window.location.pathname}#/c/${negocio.slug}?tema=${negocio.tema || "elegante"}&qr=1`
 
   return (
     <div className="space-y-4">

@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useCallback } from "react"
-import { CheckCircle, X } from "@phosphor-icons/react"
+import { CheckCircle, WarningCircle, X } from "@phosphor-icons/react"
 
 const ToastContext = createContext()
 
@@ -23,7 +23,11 @@ export function ToastProvider({ children }) {
             key={t.id}
             className="flex items-center gap-3 px-4 py-3 rounded-xl surface shadow-[var(--shadow-lg)] text-sm font-medium text-[var(--fg)]"
           >
-            <CheckCircle size={18} weight="bold" className="text-green-500" />
+            {t.type === "error" ? (
+              <WarningCircle size={18} weight="bold" className="text-red-500" />
+            ) : (
+              <CheckCircle size={18} weight="bold" className="text-green-500" />
+            )}
             <span>{t.message}</span>
             <button onClick={() => dismiss(t.id)} className="ml-1 text-[var(--fg-muted)] hover:text-[var(--fg)]">
               <X size={15} />

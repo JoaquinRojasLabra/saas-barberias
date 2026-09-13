@@ -1,4 +1,4 @@
-import { useEffect } from "react"
+import { useEffect, useRef } from "react"
 import { motion } from "framer-motion"
 import { CalendarCheck, Phone, MapPin, Clock, ArrowRight, Scissors, PaintBrush, Drop, Sparkle, UserFocus, Camera } from "@phosphor-icons/react"
 import { useStore } from "@/context/store"
@@ -19,8 +19,9 @@ const iconoDeServicio = (nombre) => {
 }
 
 export default function PublicPage({ slug }) {
-  const { negocio, servicios, empleados, activarPorSlug, error, galeria } = useStore()
+  const { negocio, servicios, empleados, activarPorSlug, error, galeria, addQrScan } = useStore()
   const { theme, setTheme } = useTheme()
+  const scanRegistrado = useRef(false)
 
   useEffect(() => {
     if (slug) activarPorSlug(slug)
@@ -28,9 +29,13 @@ export default function PublicPage({ slug }) {
 
   useEffect(() => {
     const { query } = leerRuta()
-    const { tema } = parametrosDe(query)
+    const { tema, qr } = parametrosDe(query)
     setTheme(tema || negocio?.tema || "elegante")
-  }, [negocio?.tema, setTheme])
+    if (qr === "1" && negocio?.id && !scanRegistrado.current) {
+      scanRegistrado.current = true
+      addQrScan("qr")
+    }
+  }, [negocio?.tema, negocio?.id, setTheme, addQrScan])
 
   if (!negocio && error) {
     return (

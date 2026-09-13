@@ -10,7 +10,7 @@ export default function BottomNav() {
     { id: "agenda", icon: CalendarCheck, label: "Agenda", barbero: true },
     { id: "ventas", icon: CurrencyCircleDollar, label: "Ventas", barbero: true },
     { id: "clientes", icon: Users, label: "Clientes", barbero: true },
-    { id: "qr", icon: QrCode, label: "QR", barbero: true },
+    { id: "qr", icon: QrCode, label: "QR", barbero: false },
     { id: "ajustes", icon: GearSix, label: "Más", barbero: true },
   ].filter((it) => (esBarbero ? it.barbero : true))
 

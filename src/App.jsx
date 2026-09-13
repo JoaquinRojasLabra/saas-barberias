@@ -19,15 +19,12 @@ import Clientes from "@/components/clientes/Clientes"
 import QR from "@/components/qr/QR"
 import Ajustes from "@/components/ajustes/Ajustes"
 import Personalizacion from "@/components/personalizacion/Personalizacion"
-import { useRecordatorios } from "@/lib/recordatorios"
 
 const ParticleField = lazy(() => import("@/components/ParticleField"))
 
 function Shell() {
   const { view, recuperando } = useStore()
   const { authed } = useAuth()
-
-  useRecordatorios()
 
   if (recuperando || !authed) return <Login />
 

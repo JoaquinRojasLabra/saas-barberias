@@ -1,11 +1,12 @@
 import { useState } from "react"
-import { Plus, Trash, PencilSimple, Check, X, Storefront, Palette, Scissors, Key, ChatTeardrop, ArrowRight, Power, Users, UserCircle, Bank, CurrencyDollar, CreditCard } from "@phosphor-icons/react"
+import { Plus, Trash, PencilSimple, Check, X, Storefront, Palette, Scissors, Key, ChatTeardrop, ArrowRight, Power, Users, UserCircle, Bank, CurrencyDollar, CreditCard, WhatsappLogo } from "@phosphor-icons/react"
 import { useStore } from "@/context/store"
 import { useTheme } from "@/lib/theme"
 import { useToast } from "@/lib/toast"
+import { supabase } from "@/lib/supabase"
 
 export default function Ajustes() {
-  const { negocio, servicios, empleados, session, updateNegocio, updatePreferencias, preferencias, addServicio, updateServicio, removeServicio, esBarbero, updateEmpleado, guardarCredencialesMp, datosPago, setView } = useStore()
+  const { negocio, servicios, empleados, session, updateNegocio, updatePreferencias, preferencias, addServicio, updateServicio, removeServicio, esBarbero, updateEmpleado, guardarCredencialesMp, guardarCredencialesWa, datosPago, setView } = useStore()
   const { theme, setTheme, THEMES } = useTheme()
   const push = useToast()
 
@@ -35,6 +36,10 @@ export default function Ajustes() {
   })
 
   const [mpCreds, setMpCreds] = useState({ publicKey: "", accessToken: "" })
+  const [waCreds, setWaCreds] = useState({ waToken: "", waPhoneId: "", waTemplateName: datosPago?.waTemplateName || "recordatorio_cita" })
+  const [verGuia, setVerGuia] = useState(false)
+  const [verGuiaMp, setVerGuiaMp] = useState(false)
+  const [waTest, setWaTest] = useState({ telefono: "", estado: "idle", mensaje: "" })
 
   const miEmpleado = esBarbero ? empleados.find((e) => e.id === session?.barberoId) : null
   const [transfer, setTransfer] = useState({
@@ -81,6 +86,46 @@ export default function Ajustes() {
         setMpCreds({ publicKey: "", accessToken: "" })
       })
       .catch((err) => push(err?.message || "No se pudieron guardar las credenciales", "error"))
+  }
+
+  const saveWaCreds = (e) => {
+    e.preventDefault()
+    if (!waCreds.waToken.trim() || !waCreds.waPhoneId.trim()) {
+      push("Completa el Token de acceso y el ID del número", "error")
+      return
+    }
+    guardarCredencialesWa({
+      waToken: waCreds.waToken.trim(),
+      waPhoneId: waCreds.waPhoneId.trim(),
+      waTemplateName: waCreds.waTemplateName.trim() || "recordatorio_cita",
+    })
+      .then(() => {
+        push("Conexión de WhatsApp guardada")
+        setWaCreds((prev) => ({ ...prev, waToken: "", waPhoneId: "" }))
+      })
+      .catch((err) => push(err?.message || "No se pudieron guardar las credenciales", "error"))
+  }
+
+  const probarWa = async (e) => {
+    e.preventDefault()
+    const tel = waTest.telefono.trim()
+    if (!tel) {
+      setWaTest({ telefono: "", estado: "error", mensaje: "Escribe tu número con código de país, ej. +56912345678." })
+      return
+    }
+    setWaTest((prev) => ({ ...prev, estado: "cargando", mensaje: "" }))
+    try {
+      const { data, error } = await supabase.rpc("probar_conexion_wa", { p_telefono: tel })
+      if (error) throw new Error(error.message)
+      const detalle = data?.detalle?.error?.message || (typeof data?.detalle === "string" ? data.detalle : "")
+      setWaTest({
+        telefono: tel,
+        estado: data?.ok ? "ok" : "error",
+        mensaje: data?.ok ? data.mensaje : (detalle || data?.mensaje || "La prueba falló, revisa que la plantilla esté aprobada."),
+      })
+    } catch (err) {
+      setWaTest({ telefono: tel, estado: "error", mensaje: err?.message || "No se pudo probar la conexión" })
+    }
   }
 
   const saveIdentidad = (e) => {
@@ -272,6 +317,100 @@ export default function Ajustes() {
             </button>
           </div>
         </form>
+        <p className="text-xs text-[var(--fg-muted)]">El aviso se envía automáticamente desde el servidor con los minutos de antelación elegidos.</p>
+      </section>
+
+      {/* Conexión WhatsApp Business */}
+      <section className="space-y-4">
+        <h2 className="flex items-center gap-2 text-sm font-bold text-[var(--fg)]"><WhatsappLogo size={18} weight="duotone" className="text-[var(--accent)]" /> Conexión WhatsApp Business</h2>
+
+        {datosPago?.waConfigurado ? (
+          <div className="flex items-center gap-2 rounded-xl px-4 py-3 text-sm font-semibold" style={{ background: "color-mix(in srgb, var(--accent) 12%, transparent)", color: "var(--accent)" }}>
+            <Check size={16} weight="bold" /> Conectado · plantilla «{datosPago?.waTemplateName || "recordatorio_cita"}»
+          </div>
+        ) : (
+          <div className="rounded-xl px-4 py-3 text-sm font-medium text-[var(--fg-muted)]" style={{ background: "color-mix(in srgb, var(--accent) 8%, transparent)" }}>
+            Sin conectar: los recordatorios automáticos no se envían hasta que guardes tus credenciales abajo (guía paso a paso más abajo).
+          </div>
+        )}
+
+        <div className="surface p-6 space-y-4">
+          <button type="button" onClick={() => setVerGuia(!verGuia)} className="w-full flex items-center justify-between gap-2 text-sm font-semibold text-[var(--fg)]">
+            <span className="flex items-center gap-2"><ChatTeardrop size={16} weight="duotone" className="text-[var(--accent)]" /> ¿Cómo configurarlo? Guía paso a paso</span>
+            <span className="text-[var(--fg-muted)]">{verGuia ? "▲" : "▼"}</span>
+          </button>
+
+          {verGuia && (
+            <ol className="space-y-4 text-sm text-[var(--fg-muted)] list-none">
+              <li>
+                <p className="font-bold text-[var(--fg)]">1. Crea la app en Meta</p>
+                <p>Entra a <a href="https://developers.facebook.com" target="_blank" rel="noreferrer" className="underline">developers.facebook.com</a> con tu cuenta de Facebook o Instagram. Toca «Crear app» → tipo <b>Negocio</b> → añade el producto <b>WhatsApp</b>.</p>
+              </li>
+              <li>
+                <p className="font-bold text-[var(--fg)]">2. Conecta tu número</p>
+                <p>En «API Setup» verás tu número. Regístralo (verifica tu negocio si Meta lo pide). Junto al número aparece el <b>ID del número (Phone ID)</b> — es el que pegas en el campo «ID del número».</p>
+              </li>
+              <li>
+                <p className="font-bold text-[var(--fg)]">3. Usa el token permanente (no el de 24 horas)</p>
+                <p>El token que muestra «API Setup» dura solo <b>24 horas</b> y dejaría de funcionar. Para que nunca expire: <b>Configuración del negocio → Usuarios → Usuarios del sistema → Agregar</b> → asígnale los permisos <i>whatsapp_business_messaging</i> y <i>whatsapp_business_management</i> → «Generar token». Ese token sí es permanente: cópialo y pégalo aquí.</p>
+              </li>
+              <li>
+                <p className="font-bold text-[var(--fg)]">4. Crea la plantilla</p>
+                <p>Entra a <a href="https://business.facebook.com/wa/manage" target="_blank" rel="noreferrer" className="underline">business.facebook.com/wa/manage</a> → «Plantillas de mensajes» → «Crear plantilla». Nómbrala exactamente <code className="px-1.5 py-0.5 rounded text-xs" style={{ background: "color-mix(in srgb, var(--accent) 14%, transparent)", color: "var(--fg)" }}>recordatorio_cita</code>, idioma Español, y escribe este texto:</p>
+                <pre className="mt-2 whitespace-pre-wrap rounded-xl p-3 text-xs" style={{ background: "color-mix(in srgb, var(--accent) 10%, transparent)" }}>{`Hola, te recordamos tu cita en {{1}} el {{2}} a las {{3}}. ¡Te esperamos!`}</pre>
+                <p>Espera a que Meta la apruebe (suele tardar menos de una hora). La plantilla necesita exactamente esas 3 variables en ese orden.</p>
+              </li>
+              <li>
+                <p className="font-bold text-[var(--fg)]">5. Guarda y prueba</p>
+                <p>Pega el token y el ID del número abajo, toca «Guardar conexión» y luego «Probar conexión» con tu propio número para confirmar que todo funciona.</p>
+              </li>
+            </ol>
+          )}
+        </div>
+
+        <form onSubmit={saveWaCreds} className="surface p-6 space-y-4">
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div>
+              <label className={label}>Token de acceso</label>
+              <input type="password" className={input} value={waCreds.waToken} onChange={(e) => setWaCreds({ ...waCreds, waToken: e.target.value })} placeholder="EAAG... (token permanente del paso 3)" />
+            </div>
+            <div>
+              <label className={label}>ID del número (Phone ID)</label>
+              <input className={input} value={waCreds.waPhoneId} onChange={(e) => setWaCreds({ ...waCreds, waPhoneId: e.target.value })} placeholder="1xxxxxxxxxxxx3" />
+            </div>
+            <div>
+              <label className={label}>Nombre de la plantilla</label>
+              <input className={input} value={waCreds.waTemplateName} onChange={(e) => setWaCreds({ ...waCreds, waTemplateName: e.target.value })} placeholder="recordatorio_cita" />
+              <p className="mt-1 text-xs text-[var(--fg-muted)]">Debe existir en WhatsApp Manager y tener 3 variables: {"{{1}}"} nombre del negocio, {"{{2}}"} fecha (DD/MM/AAAA), {"{{3}}"} hora (HH:MM).</p>
+            </div>
+          </div>
+          <div className="flex justify-end">
+            <button type="submit" className="flex items-center gap-2 bg-[var(--accent)] text-white text-sm font-semibold px-4 py-2 rounded-xl">
+              <Check size={16} weight="bold" /> Guardar conexión
+            </button>
+          </div>
+        </form>
+
+        <form onSubmit={probarWa} className="surface p-6 space-y-4">
+          <h3 className="flex items-center gap-2 text-sm font-bold text-[var(--fg)]"><ArrowRight size={16} weight="duotone" className="text-[var(--accent)]" /> Probar conexión</h3>
+          <div>
+            <label className={label}>Tu número de WhatsApp (con código de país)</label>
+            <input className={input} value={waTest.telefono} onChange={(e) => setWaTest((prev) => ({ ...prev, telefono: e.target.value }))} placeholder="+56912345678" />
+          </div>
+          <div className="flex items-center justify-between gap-4">
+            <p className="text-xs text-[var(--fg-muted)]">Te enviamos la plantilla a ese número para confirmar que token, número y plantilla están bien.</p>
+            <button type="submit" disabled={waTest.estado === "cargando"} className="flex items-center gap-2 bg-[var(--accent)] text-white text-sm font-semibold px-4 py-2 rounded-xl disabled:opacity-50">
+              <ArrowRight size={16} weight="bold" /> {waTest.estado === "cargando" ? "Enviando…" : "Probar"}
+            </button>
+          </div>
+          {waTest.mensaje && (
+            <p className="rounded-xl px-3 py-2 text-xs font-medium" style={waTest.estado === "ok"
+              ? { color: "#16a34a", background: "rgba(22,163,74,0.12)" }
+              : { color: "#dc2626", background: "rgba(220,38,38,0.12)" }}>
+              {waTest.mensaje}
+            </p>
+          )}
+        </form>
       </section>
 
       {/* Página pública */}
@@ -359,6 +498,39 @@ export default function Ajustes() {
             <p className="text-xs text-[var(--fg-muted)]">
               {datosPago?.mpConfigurado ? "Ya hay credenciales guardadas. Puedes reemplazarlas aquí." : "Estas credenciales se guardan en el backend y nunca se muestran en el navegador."}
             </p>
+
+            <div className="space-y-4 rounded-xl p-4" style={{ background: "color-mix(in srgb, var(--accent) 8%, transparent)" }}>
+              <button type="button" onClick={() => setVerGuiaMp(!verGuiaMp)} className="w-full flex items-center justify-between gap-2 text-sm font-semibold text-[var(--fg)]">
+                <span className="flex items-center gap-2"><Bank size={16} weight="duotone" className="text-[var(--accent)]" /> ¿Cómo obtenerlas? Guía paso a paso</span>
+                <span className="text-[var(--fg-muted)]">{verGuiaMp ? "▲" : "▼"}</span>
+              </button>
+
+              {verGuiaMp && (
+                <ol className="space-y-4 text-sm text-[var(--fg-muted)] list-none">
+                  <li>
+                    <p className="font-bold text-[var(--fg)]">1. Ten una cuenta de Mercado Pago</p>
+                    <p>Crea tu cuenta en <a href="https://www.mercadopago.com" target="_blank" rel="noreferrer" className="underline">mercadopago.com</a> (o usa la que ya tengas). Verifícala con los datos de tu negocio: ese número de cuenta será el que recibe el dinero.</p>
+                  </li>
+                  <li>
+                    <p className="font-bold text-[var(--fg)]">2. Entra al panel de desarrolladores</p>
+                    <p>Entra a <a href="https://developers.mercadopago.com" target="_blank" rel="noreferrer" className="underline">developers.mercadopago.com</a> e inicia sesión con la misma cuenta. En «Mis aplicaciones» crea una aplicación (o usa la que ya tengas).</p>
+                  </li>
+                  <li>
+                    <p className="font-bold text-[var(--fg)]">3. Copia las dos credenciales</p>
+                    <p>Dentro de tu aplicación ve a «Credenciales». Ahí están la <b>Public Key</b> y el <b>Access Token</b> (empiezan con <code className="px-1.5 py-0.5 rounded text-xs" style={{ background: "color-mix(in srgb, var(--accent) 14%, transparent)", color: "var(--fg)" }}>APP_USR-…</code>). Son dos códigos distintos: uno va en «Public Key» y el otro en «Access Token».</p>
+                  </li>
+                  <li>
+                    <p className="font-bold text-[var(--fg)]">4. Activa el modo producción</p>
+                    <p>Para cobrar de verdad necesitas completar la <b>verificación de producción</b> (botón «Completar el flujo de producción» en el panel). Las credenciales que empiezan con <code className="px-1.5 py-0.5 rounded text-xs" style={{ background: "color-mix(in srgb, var(--accent) 14%, transparent)", color: "var(--fg)" }}>TEST-…</code> sirven solo para probar y no cobran de verdad.</p>
+                  </li>
+                  <li>
+                    <p className="font-bold text-[var(--fg)]">5. Pega y guarda</p>
+                    <p>Pega la <b>Public Key</b> y el <b>Access Token</b> abajo y toca «Guardar credenciales». El interruptor de Mercado Pago en «Métodos de pago» ya quedará activado.</p>
+                  </li>
+                </ol>
+              )}
+            </div>
+
             <div className="grid gap-4 sm:grid-cols-2">
               <div>
                 <label className={label}>Public Key</label>

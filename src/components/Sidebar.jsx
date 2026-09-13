@@ -14,8 +14,8 @@ export default function Sidebar() {
     { id: "agenda", label: "Agenda", icon: CalendarCheck, barbero: true },
     { id: "clientes", label: "Clientes", icon: Users, barbero: true },
     { id: "ventas", label: "Ventas", icon: CurrencyCircleDollar, barbero: true },
-    { id: "qr", label: "Mi QR", icon: QrCode, barbero: true },
-    { id: "personalizacion", label: "Personalización", icon: Palette, barbero: true },
+    { id: "qr", label: "Mi QR", icon: QrCode, barbero: false },
+    { id: "personalizacion", label: "Personalización", icon: Palette, barbero: false },
     { id: "ajustes", label: "Ajustes", icon: GearSix, barbero: true },
   ].filter((it) => (esBarbero ? it.barbero : true))
 

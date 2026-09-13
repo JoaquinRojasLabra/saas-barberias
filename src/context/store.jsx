@@ -2,8 +2,6 @@ import { createContext, useContext, useState, useEffect, useMemo, useCallback, u
 import { supabase, supabasePublic } from "@/lib/supabase"
 import { filaAFront, frontAFila, mapaDe } from "@/lib/mapos"
 
-const filaA = filaAFront
-
 const StoreContext = createContext()
 
 function leerHora (v) {
@@ -21,7 +19,7 @@ export function StoreProvider({ children }) {
   const [ventas, setVentas] = useState([])
   const [qrStats, setQrStats] = useState([])
   const [preferencias, setPreferencias] = useState({ horasRecordatorio: 2, whatsappNumero: "", pagoEfectivo: true, pagoTransferencia: false, pagoMp: false })
-  const [datosPago, setDatosPago] = useState({ efectivo: true, transferencia: false, mp: false, mpConfigurado: false, transferenciaNegocio: null, barberos: [] })
+  const [datosPago, setDatosPago] = useState({ efectivo: true, transferencia: false, mp: false, mpConfigurado: false, waConfigurado: false, waTemplateName: null, transferenciaNegocio: null, barberos: [] })
   const [slotsHorario, setSlotsHorario] = useState([])
   const [galeria, setGaleria] = useState([])
   const [cargando, setCargando] = useState(true)
@@ -46,7 +44,7 @@ export function StoreProvider({ children }) {
     setVentas([])
     setQrStats([])
     setPreferencias({ horasRecordatorio: 2, whatsappNumero: "", pagoEfectivo: true, pagoTransferencia: false, pagoMp: false })
-    setDatosPago({ efectivo: true, transferencia: false, mp: false, mpConfigurado: false, transferenciaNegocio: null, barberos: [] })
+    setDatosPago({ efectivo: true, transferencia: false, mp: false, mpConfigurado: false, waConfigurado: false, waTemplateName: null, transferenciaNegocio: null, barberos: [] })
     setSlotsHorario([])
     setGaleria([])
     setCargando(true)
@@ -83,7 +81,7 @@ export function StoreProvider({ children }) {
       setSlotsHorario((slots.data || []).map((s) => leerHora(s.hora)))
       setGaleria(mapaDe(gal.data).sort((a, b) => (a.orden ?? 0) - (b.orden ?? 0)))
       setQrStats(mapaDe(qr.data))
-      setPreferencias(pref?.data ? filaA(pref.data) : { horasRecordatorio: 2, whatsappNumero: negocio?.telefono || "", pagoEfectivo: true, pagoTransferencia: false, pagoMp: false })
+      setPreferencias(pref?.data ? filaAFront(pref.data) : { horasRecordatorio: 2, whatsappNumero: negocio?.telefono || "", pagoEfectivo: true, pagoTransferencia: false, pagoMp: false })
       await cargarDatosPago(negocioId)
       setCargando(false)
     } catch (e) {
@@ -112,7 +110,7 @@ export function StoreProvider({ children }) {
         supabase.from("empleados").select("*").eq("usuario_auth", userId).maybeSingle(),
       ])
       if (negRes.data) {
-        setNegocio(filaA(negRes.data))
+        setNegocio(filaAFront(negRes.data))
         setSesion({ usuarioId: userId, rol: "dueno", negocioId: negRes.data.id, empleadoId: null, barberoId: null })
         await cargarTenant(negRes.data.id)
         return
@@ -120,7 +118,7 @@ export function StoreProvider({ children }) {
       if (empRes.data) {
         const { data: n } = await supabase.from("negocios").select("id, nombre") .eq("id", empRes.data.negocio_id).single()
         if (!n) { setSesion(null); return }
-        setNegocio(filaA(n))
+        setNegocio(filaAFront(n))
         setSesion({ usuarioId: userId, rol: "barbero", negocioId: n.id, empleadoId: empRes.data.id, barberoId: empRes.data.id })
         setView("agenda")
         await cargarTenant(n.id)
@@ -215,7 +213,7 @@ export function StoreProvider({ children }) {
       if (!data) { setNegocio(null); setServicios([]); setEmpleados([]); setSlotsHorario([]); setGaleria([]); setError("Barbería no encontrada"); setCargando(false); return null }
       const yaAutenticado = session?.rol && session.rol !== "anon"
       if (!yaAutenticado) setSesion({ usuarioId: null, rol: "anon", negocioId: data.id, empleadoId: null, barberoId: null })
-      setNegocio(filaA(data))
+      setNegocio(filaAFront(data))
       const [srvs, emps, slots, gal] = await Promise.all([
         supabase.from("servicios").select("*").eq("negocio_id", data.id).order("created_at"),
         supabase.from("empleados").select("id, negocio_id, nombre").eq("negocio_id", data.id).order("created_at"),
@@ -242,6 +240,22 @@ export function StoreProvider({ children }) {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session?.rol])
+
+  const refrescarQr = useCallback(async (negocioId) => {
+    if (!negocioId) return
+    const { data, error } = await supabase.from("qr_stats").select("*").eq("negocio_id", negocioId).order("fecha_hora", { ascending: false })
+    if (!error && data) setQrStats(mapaDe(data))
+  }, [])
+
+  useEffect(() => {
+    const nid = session?.negocioId
+    const activo = session?.rol === "dueno" || session?.rol === "barbero"
+    if (!activo || !nid) return
+    const traer = async () => { if (document.visibilityState === "hidden") return; refrescarQr(nid) }
+    traer()
+    const timer = setInterval(traer, 5000)
+    return () => clearInterval(timer)
+  }, [session?.rol, session?.negocioId, refrescarQr])
 
   const refrescar = useCallback(async (negocioId) => {
     if (!negocioId) return
@@ -275,14 +289,14 @@ export function StoreProvider({ children }) {
   const setTurnoEstado = useCallback(async (id, estado) => {
     const t = turnos.find((x) => x.id === id)
     if (!t) return
-    const { error } = await supabase.from("turnos").update({ estado }).eq("id", id)
+    const { error } = await supabase.from("turnos").update(estado === "cumplido" ? { estado, pagado: true } : { estado }).eq("id", id)
     if (error) throw error
     if (estado === "cumplido" && !t.pagado) {
       const svc = servicios.find((sv) => sv.id === t.servicioId) || { precio: 0 }
       const { error: e2 } = await supabase.from("ventas").insert({
         negocio_id: t.negocioId, cliente_id: t.clienteId, servicio_id: t.servicioId, turno_id: t.id,
         empleado_id: t.empleadoId, monto: svc.precio,
-        fecha_hora: `${t.fecha}T${t.hora}:00`,
+        fecha_hora: `${t.fecha}T${t.hora.slice(0, 5)}:00`,
         metodo: t.metodoPago || "Efectivo", pagado: true, pendiente_pago: false,
       })
       if (e2) throw e2
@@ -312,7 +326,7 @@ export function StoreProvider({ children }) {
       pendiente_pago: venta.pendientePago ?? venta.metodo === "Mercado Pago",
     }).select("*").single()
     if (error) throw error
-    setVentas((prev) => [filaA(data), ...prev])
+    setVentas((prev) => [filaAFront(data), ...prev])
     return data
   }, [negocio?.id])
 
@@ -336,10 +350,10 @@ export function StoreProvider({ children }) {
   const addQrScan = useCallback(async (fuente) => {
     const nid = negocio?.id
     if (!nid) return
-    const { data, error } = await supabase.from("qr_stats").insert({
+    const { error } = await supabase.from("qr_stats").insert({
       negocio_id: nid, fuente, fecha_hora: new Date().toISOString(),
-    }).select("*").single()
-    if (!error && data) setQrStats((prev) => [filaA(data), ...prev])
+    })
+    if (!error) setQrStats((prev) => [{ negocioId: nid, fuente }, ...prev])
   }, [negocio?.id])
 
   const updateNegocio = useCallback(async (patch) => {
@@ -381,6 +395,18 @@ export function StoreProvider({ children }) {
     await cargarDatosPago(nid)
   }, [negocio?.id, cargarDatosPago])
 
+  const guardarCredencialesWa = useCallback(async ({ negocioId, waToken, waPhoneId, waTemplateName }) => {
+    const nid = negocioId || negocio?.id
+    if (!nid) return
+    const { error } = await supabase.rpc("guardar_credenciales_wa", {
+      p_wa_token: waToken,
+      p_wa_phone_id: waPhoneId,
+      p_wa_template_name: waTemplateName || "recordatorio_cita",
+    })
+    if (error) throw new Error(error.message)
+    await cargarDatosPago(nid)
+  }, [negocio?.id, cargarDatosPago])
+
   const updateSlotsHorario = useCallback(async (slots) => {
     const nid = negocio?.id
     if (!nid) return
@@ -411,7 +437,7 @@ export function StoreProvider({ children }) {
         negocio_id: nid, nombre: cliente.nombre, whatsapp: cliente.whatsapp, telefono: cliente.telefono,
         notas: cliente.notas, visitas: 0, empleado_id: cliente.empleadoId || null,
       }).select("*").single()
-      if (!error && data) return filaA(data)
+      if (!error && data) return filaAFront(data)
     }
     setClientes((prev) => [c, ...prev])
     return c
@@ -429,7 +455,7 @@ export function StoreProvider({ children }) {
       negocio_id: nid, nombre: servicio.nombre, duracion: servicio.duracion, precio: servicio.precio,
     }).select("*").single()
     if (error) throw error
-    setServicios((prev) => [...prev, filaA(data)])
+    setServicios((prev) => [...prev, filaAFront(data)])
     return data
   }, [negocio?.id])
 
@@ -458,8 +484,8 @@ export function StoreProvider({ children }) {
     }
     const { data, error } = await supabase.from("empleados").insert(payload).select("*").single()
     if (error) throw error
-    setEmpleados((prev) => [...prev, filaA(data)])
-    return filaA(data)
+    setEmpleados((prev) => [...prev, filaAFront(data)])
+    return filaAFront(data)
   }, [negocio?.id])
 
   const updateEmpleado = useCallback(async (id, patch) => {
@@ -560,6 +586,7 @@ export function StoreProvider({ children }) {
     datosPago,
     cargarDatosPago,
     guardarCredencialesMp,
+    guardarCredencialesWa,
   }
 
   return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>

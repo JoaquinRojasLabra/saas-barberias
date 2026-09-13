@@ -25,7 +25,7 @@ export default function Ventas() {
   useEffect(() => () => { if (timerRef.current) clearTimeout(timerRef.current) }, [])
 
   const totalHoy = ventas
-    .filter((v) => v.fechaHora.slice(0, 10) === hoyKey())
+    .filter((v) => v.fechaHora?.startsWith(hoyKey()) && !v.pendientePago)
     .reduce((sum, v) => sum + v.monto, 0)
 
   return (

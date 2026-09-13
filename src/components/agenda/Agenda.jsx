@@ -1,18 +1,20 @@
 import { useState } from "react"
 import { Plus } from "@phosphor-icons/react"
 import { useStore } from "@/context/store"
+import { hoyKey } from "@/lib/format"
 import TurnoChip from "./TurnoChip"
 import TurnoModal from "./TurnoModal"
 
 export default function Agenda() {
   const { turnos: turnosRaw, clientes, servicios, setTurnoEstado, scope, esBarbero, session } = useStore()
   const turnos = esBarbero ? scope.turnos : turnosRaw
+  const hoy = hoyKey()
   const [showModal, setShowModal] = useState(false)
 
   const getCliente = (id) => clientes.find((c) => c.id === id)
   const getServicio = (id) => servicios.find((s) => s.id === id)
 
-  const ordenados = [...turnos].sort((a, b) => (a.hora < b.hora ? -1 : a.hora > b.hora ? 1 : 0))
+  const ordenados = [...turnos].filter((t) => t.fecha === hoy).sort((a, b) => (a.hora < b.hora ? -1 : a.hora > b.hora ? 1 : 0))
 
   return (
     <div className="space-y-4">
