@@ -1,13 +1,15 @@
 import { useState } from "react"
 import { AnimatePresence, motion } from "framer-motion"
-import { Phone, Plus, MagnifyingGlass, PencilSimple, X, UserMinus } from "@phosphor-icons/react"
+import { Phone, Plus, MagnifyingGlass, PencilSimple, X, UsersThree } from "@phosphor-icons/react"
 import { useStore } from "@/context/store"
 import { formatCLP } from "@/lib/format"
+import EstadoVacio from "@/components/common/EstadoVacio"
+import useEstadoVista from "@/components/common/useEstadoVista.jsx"
 import ClienteModal from "./ClienteModal"
 import FichaCliente from "./FichaCliente"
 
 export default function Clientes() {
-  const { clientes: clientesRaw, ventas: ventasRaw, turnos: turnosRaw, scope, esBarbero } = useStore()
+  const { clientes: clientesRaw, ventas: ventasRaw, turnos: turnosRaw, scope, esBarbero, cargando, error, cargarTenant, negocioId } = useStore()
   const clientes = esBarbero ? scope.clientes : clientesRaw
   const ventas = esBarbero ? scope.ventas : ventasRaw
   const turnos = esBarbero ? scope.turnos : turnosRaw
@@ -18,6 +20,19 @@ export default function Clientes() {
   const ordenados = [...clientes]
     .sort((a, b) => a.nombre.localeCompare(b.nombre, "es"))
     .filter((c) => !q || c.nombre.toLowerCase().includes(q.toLowerCase()) || (c.telefono || "").includes(q))
+
+  const estado = useEstadoVista({
+    cargando,
+    error,
+    onReintentar: () => cargarTenant(negocioId),
+    vacio: clientes.length === 0,
+    icono: UsersThree,
+    titulo: "Aún no tienes clientes",
+    descripcion: "Crea tu primer cliente para llevar su ficha, turnos y ventas",
+    cta: "Nuevo cliente",
+    onCta: () => setModal("nuevo"),
+  })
+  if (estado) return estado
 
   return (
     <div className="space-y-4">
@@ -89,10 +104,11 @@ export default function Clientes() {
           })}
         </AnimatePresence>
         {ordenados.length === 0 && (
-          <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex items-center justify-center gap-2 text-sm text-[var(--fg-muted)] py-8">
-            <UserMinus size={18} weight="duotone" className="text-[var(--accent)]" />
-            {q ? "Sin resultados para tu búsqueda." : "No hay clientes registrados."}
-          </motion.p>
+          <EstadoVacio
+            icono={MagnifyingGlass}
+            titulo="Sin resultados"
+            descripcion={`No encontramos clientes para «${q}»`}
+          />
         )}
       </div>
 
