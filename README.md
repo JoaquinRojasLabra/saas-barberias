@@ -1,16 +1,92 @@
-# React + Vite
+# SaaS Barberías
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+Plataforma SaaS para gestión integral de barberías. Agenda, ventas, clientes, reservas online, QR para walk-ins, WhatsApp automatizado y página pública personalizable.
 
-Currently, two official plugins are available:
+## Características
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- **Dashboard** — métricas en tiempo real (escaneos QR, ventas, citas), gráfico de ventas, KPIs animados
+- **Agenda** — gestión de turnos con drag, estados (pendiente/en curso/terminado), recordatorios automáticos
+- **Clientes** — ficha completa con historial de visitas, deudas y datos de contacto
+- **Ventas** — registro de servicios y productos, métodos de pago (efectivo, transferencia, Mercado Pago)
+- **QR Walk-in** — código QR dinámico para que clientes se registren al llegar, dashboard de escaneos en vivo
+- **WhatsApp** — recordatorios automáticos de citas vía cron, credenciales configurables desde Ajustes
+- **Página pública** — sitio público por negocio con logo, galería, horarios y reservas online
+- **Reservas online** — clientes reservan turnos directamente desde la página pública
+- **Personalización** — identidad visual del negocio (logo 3D, colores, galería de fotos)
+- **Brand customization** — cada barbería tiene su propia identidad visual (logo, color, galería)
 
-## React Compiler
+## Stack
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+| Capa | Tecnología |
+|------|-----------|
+| Framework | React 19 + Vite 8 |
+| Estilos | Tailwind CSS v4 |
+| Animaciones | Framer Motion, GSAP, Three.js |
+| Iconos | Phosphor Icons |
+| Base de datos | Supabase (PostgreSQL + Auth + RPC) |
+| QR | qrcode.react |
+| Testing | Vitest + Testing Library |
+| Linting | Oxlint |
+| Deploy | Vercel |
 
-## Expanding the Oxlint configuration
+## Estructura
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and Oxlint's TypeScript related rules in your project.
+```
+src/
+├── components/
+│   ├── agenda/        # Gestión de turnos
+│   ├── ajustes/       # Configuración (credenciales WhatsApp)
+│   ├── clientes/      # Ficha e historial de clientes
+│   ├── dashboard/     # Métricas, gráficos, KPIs
+│   ├── personalizacion/ # Identidad visual del negocio
+│   ├── public/        # Logo 3D
+│   ├── qr/            # Código QR walk-in
+│   └── ventas/        # Registro de ventas
+├── context/           # Estado global (store)
+├── data/              # Datos estáticos
+├── lib/               # Utilidades (auth, format, supabase, whatsapp, etc.)
+├── pages/             # Página pública y reserva online
+└── test/              # Suite de tests (14 archivos)
+```
+
+## Instalación
+
+```bash
+npm install
+```
+
+## Desarrollo
+
+```bash
+npm run dev
+```
+
+## Scripts
+
+| Comando | Descripción |
+|---------|-------------|
+| `npm run dev` | Servidor de desarrollo |
+| `npm run build` | Build de producción |
+| `npm run preview` | Preview del build |
+| `npm run test` | Ejecutar tests |
+| `npm run test:watch` | Tests en watch mode |
+| `npm run lint` | Linting con Oxlint |
+
+## Deploy
+
+```bash
+npx vercel --prod
+```
+
+## Variables de entorno
+
+El proyecto usa Supabase. Configura las credenciales en un archivo `.env.local`:
+
+```
+VITE_SUPABASE_URL=tu_url
+VITE_SUPABASE_ANON_KEY=tu_key
+```
+
+## Licencia
+
+Proyecto privado.
