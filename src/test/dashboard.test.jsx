@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest"
-import { render, screen } from "@testing-library/react"
+import { render, screen, fireEvent } from "@testing-library/react"
 import React from "react"
 import { hoyKey, formatCLP } from "@/lib/format"
 
@@ -26,6 +26,7 @@ const mocks = {
       { id: "v3", fechaHora: "1999-01-01T10:00", monto: 99999 },
     ],
   },
+  setView: vi.fn(),
 }
 
 vi.mock("@/context/store", () => ({
@@ -35,6 +36,7 @@ vi.mock("@/context/store", () => ({
     esBarbero: mocks.esBarbero,
     session: mocks.session,
     empleados: mocks.empleados,
+    setView: mocks.setView,
   }),
 }))
 vi.mock("@/components/CountUp", () => ({
@@ -122,5 +124,15 @@ describe("Dashboard", () => {
     for (const d of ["L", "M", "X", "J", "V", "S", "D"]) {
       expect(screen.getByText(d)).toBeInTheDocument()
     }
+  })
+
+  it("muestra el estado vacío cuando no hay ningún registro", () => {
+    const antes = mocks.scope
+    mocks.scope = { turnos: [], ventas: [] }
+    render(<Dashboard />)
+    expect(screen.getByText("Sin actividad todavía")).toBeInTheDocument()
+    fireEvent.click(screen.getByRole("button", { name: /Ir a ventas/i }))
+    expect(mocks.setView).toHaveBeenCalledWith("ventas")
+    mocks.scope = antes
   })
 })

@@ -1,7 +1,9 @@
 import { useMemo } from "react"
-import { CurrencyCircleDollar, CalendarCheck, UserMinus, Users } from "@phosphor-icons/react"
+import { CurrencyCircleDollar, CalendarCheck, ChartLineUp, UserMinus, Users } from "@phosphor-icons/react"
 import { useStore } from "@/context/store"
 import { formatCLP, hoyKey } from "@/lib/format"
+import EstadoVacio from "@/components/common/EstadoVacio"
+import useEstadoVista from "@/components/common/useEstadoVista.jsx"
 import MetricCard from "./MetricCard"
 import ProgressRing from "./ProgressRing"
 import SalesChart from "./SalesChart"
@@ -23,7 +25,7 @@ function diasSemana(hoy) {
 }
 
 export default function Dashboard() {
-  const { scope, qrStats, esBarbero, session, empleados } = useStore()
+  const { scope, qrStats, esBarbero, session, empleados, cargando, error, cargarTenant, negocioId, setView } = useStore()
   const { turnos, ventas } = scope
   const hoy = hoyKey()
 
@@ -56,6 +58,11 @@ export default function Dashboard() {
 
   const barberoNombre = empleados.find((e) => e.id === session?.barberoId)?.nombre || "barbero"
 
+  const estado = useEstadoVista({ cargando, error, onReintentar: () => cargarTenant(negocioId) })
+  if (estado) return estado
+
+  const sinActividad = turnos.length === 0 && ventas.length === 0
+
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-2 flex-wrap">
@@ -75,12 +82,26 @@ export default function Dashboard() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <div className="lg:col-span-1 flex items-center justify-center">
-          <ProgressRing value={resumen.totalHoy} max={resumen.metaDia} label={`de la meta de hoy · ${formatCLP(resumen.metaDia)}`} />
+        {sinActividad ? (
+        <div className="lg:col-span-3">
+          <EstadoVacio
+            icono={ChartLineUp}
+            titulo="Sin actividad todavía"
+            descripcion="Registra tu primera venta o turno para ver métricas aquí"
+            cta="Ir a ventas"
+            onCta={() => setView("ventas")}
+          />
         </div>
-        <div className="lg:col-span-2">
-          <SalesChart data={semana} />
-        </div>
+      ) : (
+        <>
+          <div className="lg:col-span-1 flex items-center justify-center">
+            <ProgressRing value={resumen.totalHoy} max={resumen.metaDia} label={`de la meta de hoy · ${formatCLP(resumen.metaDia)}`} />
+          </div>
+          <div className="lg:col-span-2">
+            <SalesChart data={semana} />
+          </div>
+        </>
+      )}
       </div>
     </div>
   )
