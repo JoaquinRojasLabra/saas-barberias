@@ -1,12 +1,13 @@
 import { useState } from "react"
-import { Plus } from "@phosphor-icons/react"
+import { CalendarBlank, Plus } from "@phosphor-icons/react"
 import { useStore } from "@/context/store"
 import { hoyKey } from "@/lib/format"
+import useEstadoVista from "@/components/common/useEstadoVista.jsx"
 import TurnoChip from "./TurnoChip"
 import TurnoModal from "./TurnoModal"
 
 export default function Agenda() {
-  const { turnos: turnosRaw, clientes, servicios, setTurnoEstado, scope, esBarbero, session } = useStore()
+  const { turnos: turnosRaw, clientes, servicios, setTurnoEstado, scope, esBarbero, session, cargando, error, cargarTenant, negocioId } = useStore()
   const turnos = esBarbero ? scope.turnos : turnosRaw
   const hoy = hoyKey()
   const [showModal, setShowModal] = useState(false)
@@ -15,6 +16,19 @@ export default function Agenda() {
   const getServicio = (id) => servicios.find((s) => s.id === id)
 
   const ordenados = [...turnos].filter((t) => t.fecha === hoy).sort((a, b) => (a.hora < b.hora ? -1 : a.hora > b.hora ? 1 : 0))
+
+  const estado = useEstadoVista({
+    cargando,
+    error,
+    onReintentar: () => cargarTenant(negocioId),
+    vacio: ordenados.length === 0,
+    icono: CalendarBlank,
+    titulo: "Sin turnos para hoy",
+    descripcion: "Empieza el día agendando tu primer turno",
+    cta: "Nuevo turno",
+    onCta: () => setShowModal(true),
+  })
+  if (estado) return estado
 
   return (
     <div className="space-y-4">
@@ -28,7 +42,6 @@ export default function Agenda() {
         {ordenados.map((t) => (
           <TurnoChip key={t.id} turno={t} cliente={getCliente(t.clienteId)} servicio={getServicio(t.servicioId)} onEstado={setTurnoEstado} />
         ))}
-        {ordenados.length === 0 && <p className="text-sm text-[var(--fg-muted)]">No hay turnos agendados.</p>}
       </div>
       {showModal && <TurnoModal onClose={() => setShowModal(false)} empleadoPorDefecto={esBarbero ? session.barberoId : undefined} />}
     </div>

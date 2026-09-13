@@ -49,7 +49,7 @@ describe("Agenda", () => {
   it("muestra mensaje cuando no hay turnos hoy", () => {
     mocks.turnos = [{ id: "t2", fecha: "2020-01-01", hora: "11:00", estado: "confirmado", clienteId: "c1", servicioId: "s1" }]
     render(<Agenda />)
-    expect(screen.getByText("No hay turnos agendados.")).toBeInTheDocument()
+    expect(screen.getByText("Sin turnos para hoy")).toBeInTheDocument()
     expect(screen.queryByText("11:00 · Corte")).not.toBeInTheDocument()
   })
 
