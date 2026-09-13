@@ -474,9 +474,13 @@ export function StoreProvider({ children }) {
     if (!nid) return null
     const payload = { negocio_id: nid, nombre, activado: true }
     if (email) {
+      const claveTemporal =
+        Array.from(crypto.getRandomValues(new Uint32Array(4)))
+          .map((n) => n.toString(36))
+          .join("") + "A1!"
       const { data: nu, error: eu } = await supabase.auth.signUp({
         email,
-        password: "barberia123",
+        password: claveTemporal,
         options: { data: { nombre } },
       })
       if (eu) throw new Error((eu?.message || "No se pudo crear la cuenta del barbero").replace(/\.$/, ""))

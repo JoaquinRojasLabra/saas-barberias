@@ -614,7 +614,7 @@ function Trabajadores() {
       await addEmpleado(nombre.trim(), email.trim() || undefined)
       setNombre("")
       setEmail("")
-      push(email.trim() ? "Barbero agregado con cuenta de acceso" : "Barbero agregado")
+      push(email.trim() ? "Barbero agregado: dile que use «Olvidé mi contraseña» para fijar su clave" : "Barbero agregado")
     } catch (err) {
       push(err?.message || "No se pudo agregar el barbero", "error")
     } finally {
