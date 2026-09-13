@@ -1,11 +1,12 @@
 ﻿import { useState, useRef, useEffect } from "react"
-import { Plus, CheckCircle } from "@phosphor-icons/react"
+import { CurrencyDollar, Plus, CheckCircle } from "@phosphor-icons/react"
 import { useStore } from "@/context/store"
 import { hoyKey, formatCLP, formatHora } from "@/lib/format"
+import useEstadoVista from "@/components/common/useEstadoVista.jsx"
 import RegistroVenta from "./RegistroVenta"
 
 export default function Ventas() {
-  const { ventas: ventasRaw, clientes, servicios, scope, esBarbero, session, marcarPagadaVenta } = useStore()
+  const { ventas: ventasRaw, clientes, servicios, scope, esBarbero, session, marcarPagadaVenta, cargando, error, cargarTenant, negocioId } = useStore()
   const ventas = esBarbero ? scope.ventas : ventasRaw
   const [showModal, setShowModal] = useState(false)
   const [savedFlash, setSavedFlash] = useState(false)
@@ -27,6 +28,19 @@ export default function Ventas() {
   const totalHoy = ventas
     .filter((v) => v.fechaHora?.startsWith(hoyKey()) && !v.pendientePago)
     .reduce((sum, v) => sum + v.monto, 0)
+
+  const estado = useEstadoVista({
+    cargando,
+    error,
+    onReintentar: () => cargarTenant(negocioId),
+    vacio: ordenadas.length === 0,
+    icono: CurrencyDollar,
+    titulo: "Sin ventas todavía",
+    descripcion: "Registra la primera venta y llévala a tu historial",
+    cta: "Registrar venta",
+    onCta: () => setShowModal(true),
+  })
+  if (estado) return estado
 
   return (
     <div className="space-y-4">
@@ -74,7 +88,6 @@ export default function Ventas() {
             </div>
           </div>
         ))}
-        {ordenadas.length === 0 && <p className="text-sm text-[var(--fg-muted)]">No hay ventas registradas.</p>}
       </div>
 
       {showModal && <RegistroVenta onClose={() => setShowModal(false)} onSave={flash} empleadoPorDefecto={esBarbero ? session?.barberoId : undefined} />}
