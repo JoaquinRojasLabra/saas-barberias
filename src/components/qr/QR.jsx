@@ -3,18 +3,27 @@ import { QRCodeSVG } from "qrcode.react"
 import { QrCode, Eye, ArrowSquareOut } from "@phosphor-icons/react"
 import { useStore } from "@/context/store"
 import { navegarA } from "@/lib/router"
+import useEstadoVista from "@/components/common/useEstadoVista.jsx"
+import EstadoVacio from "@/components/common/EstadoVacio"
 
 export default function QR() {
-  const { negocio, qrStats } = useStore()
+  const { negocio, qrStats, cargando, error, cargarTenant, negocioId } = useStore()
   const fechaCorte = new Date(Date.now() - 7 * 86400000).toISOString()
   const estaSemana = qrStats.filter((q) => (q.fechaHora || "") >= fechaCorte).length
   const publicUrl = `${window.location.origin}${window.location.pathname}#/c/${negocio.slug}?tema=${negocio.tema || "elegante"}&qr=1`
+
+  const estado = useEstadoVista({
+    cargando,
+    error,
+    onReintentar: () => cargarTenant(negocioId),
+  })
+  if (estado) return estado
 
   return (
     <div className="space-y-4">
       <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}>
         <h1 className="text-xl font-extrabold tracking-tight">QR de la barbería</h1>
-        <p className="text-sm text-[var(--fg-muted)]">Pega este QR en tu vitrina para que tus clientes te vean al instante.</p>
+        <p className="text-xs text-[var(--fg-muted)]">Pega este QR en tu vitrina para que tus clientes te vean al instante.</p>
       </motion.div>
 
       <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="flex flex-col items-center gap-6 surface surface-hover rounded-2xl p-8">
@@ -39,22 +48,42 @@ export default function QR() {
           <ArrowSquareOut size={16} weight="bold" /> Ver página pública
         </button>
 
+        {qrStats.length === 0 ? (
+          <EstadoVacio
+            icono={QrCode}
+            titulo="Todavía no hay escaneos"
+            descripcion="Cuando alguien escanee tu QR con el celular, aquí verás las estadísticas."
+            cta="Ver página pública"
+            onCta={() => navegarA(`/c/${negocio.slug}`)}
+          />
+        ) : (
         <div className="w-full max-w-xs space-y-2">
-          <div className="flex items-center justify-between surface px-4 py-3">
-            <div>
-              <p className="text-xs text-[var(--fg-muted)]">Escaneos</p>
-              <p className="text-2xl font-extrabold">{qrStats.length}</p>
-            </div>
-            <Eye size={24} weight="duotone" className="text-[var(--accent)]" />
-          </div>
-          <div className="flex items-center justify-between surface px-4 py-3">
-            <div>
-              <p className="text-xs text-[var(--fg-muted)]">Esta semana</p>
-              <p className="text-2xl font-extrabold">{estaSemana}</p>
-            </div>
-            <Eye size={24} weight="duotone" className="text-[var(--accent)]" />
-          </div>
+          {qrStats.length === 0 ? (
+            <EstadoVacio
+              icono={QrCode}
+              titulo="Todavía no hay escaneos"
+              descripcion="Cuando alguien escanee tu QR, verás aquí las estadísticas."
+            />
+          ) : (
+            <>
+              <div className="flex items-center justify-between surface px-4 py-3">
+                <div>
+                  <p className="text-xs text-[var(--fg-muted)]">Escaneos</p>
+                  <p className="text-2xl font-extrabold">{qrStats.length}</p>
+                </div>
+                <Eye size={24} weight="duotone" className="text-[var(--accent)]" />
+              </div>
+              <div className="flex items-center justify-between surface px-4 py-3">
+                <div>
+                  <p className="text-xs text-[var(--fg-muted)]">Esta semana</p>
+                  <p className="text-2xl font-extrabold">{estaSemana}</p>
+                </div>
+                <Eye size={24} weight="duotone" className="text-[var(--accent)]" />
+              </div>
+            </>
+          )}
         </div>
+        )}
       </motion.div>
     </div>
   )
