@@ -1,6 +1,8 @@
-import { useState } from "react"
-import { Plus, Trash, PencilSimple, Check, X, Storefront, Palette, Scissors, Key, ChatTeardrop, ArrowRight, Power, Users, UserCircle, Bank, CurrencyDollar, CreditCard, WhatsappLogo } from "@phosphor-icons/react"
+import { useState, useRef } from "react"
+import { Plus, Trash, PencilSimple, Check, X, Storefront, Palette, Scissors, Key, ChatTeardrop, ArrowRight, Power, Users, UserPlus, UserCircle, Bank, CurrencyDollar, CreditCard, WhatsappLogo } from "@phosphor-icons/react"
 import { useStore } from "@/context/store"
+import useEstadoVista from "@/components/common/useEstadoVista"
+import EstadoVacio from "@/components/common/EstadoVacio"
 import { useTheme } from "@/lib/theme"
 import { useToast } from "@/lib/toast"
 import { supabase } from "@/lib/supabase"
@@ -557,7 +559,7 @@ export default function Ajustes() {
           <div className="grid gap-4 sm:grid-cols-[1fr_120px_140px_auto] sm:items-end">
             <div>
               <label className={label}>Nombre</label>
-              <input className={input} value={servicioForm.nombre} onChange={(e) => setServicioForm({ ...servicioForm, nombre: e.target.value })} placeholder="Corte clásico" required />
+              <input ref={nombreServicioRef} className={input} value={servicioForm.nombre} onChange={(e) => setServicioForm({ ...servicioForm, nombre: e.target.value })} placeholder="Corte clásico" required />
             </div>
             <div>
               <label className={label}>Duración (min)</label>
@@ -592,7 +594,15 @@ export default function Ajustes() {
               </div>
             </div>
           ))}
-          {(servicios?.length || 0) === 0 && <p className="text-sm text-[var(--fg-muted)]">No hay servicios. Agrega el primero arriba.</p>}
+          {(servicios?.length || 0) === 0 && (
+          <EstadoVacio
+            icono={Scissors}
+            titulo="No hay servicios"
+            descripcion="Agrega el primero y aparecerá en tu página pública."
+            cta="Agregar servicio"
+            onCta={() => nombreServicioRef.current?.focus()}
+          />
+        )}
         </div>
       </section>
     </div>
@@ -602,6 +612,7 @@ export default function Ajustes() {
 function Trabajadores() {
   const { empleados, addEmpleado, updateEmpleado, resetearClave } = useStore()
   const push = useToast()
+  const nombreTrabajadorRef = useRef(null)
   const [nombre, setNombre] = useState("")
   const [email, setEmail] = useState("")
   const [ocupado, setOcupado] = useState(false)
