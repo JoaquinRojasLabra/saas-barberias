@@ -49,6 +49,19 @@ src/
 └── test/              # Suite de tests (14 archivos)
 ```
 
+## Arquitectura
+
+Diagrama interactivo de la arquitectura del sistema: [saas-barberias.architecture.html](diagrams/saas-barberias.architecture.html)
+
+**Flujos principales:**
+
+| Flujo | Descripción |
+|-------|-------------|
+| **Reserva online** | Cliente → Página pública `/c/:slug` → RPC `reservar_turno` (anónima) → Postgres |
+| **Gestión del negocio** | Dueño/Barbero → Panel React → Supabase Auth → CRUD por `negocio_id` |
+| **Pagos Mercado Pago** | Panel → Edge fn `mp-checkout` → preferencia → Webhook → marca venta pagada |
+| **Recordatorios WhatsApp** | `pg_cron` + `pg_net` → Cloud API → template al cliente; token nunca sale de la DB |
+
 ## Instalación
 
 ```bash
