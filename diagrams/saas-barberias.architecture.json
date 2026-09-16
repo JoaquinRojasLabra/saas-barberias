@@ -1,0 +1,639 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "SaaS Barberías — Arquitectura",
+    "quality_profile": "showcase",
+    "viewBox": [
+      1190,
+      800
+    ],
+    "repository": {
+      "url": "https://github.com/JoaquinRojasLabra/saas-barberias",
+      "provider": "github",
+      "revision": "ec9ebddbcd74d9bce3bed0196eecae94a7d0ddfd"
+    },
+    "views": [
+      {
+        "id": "reserva",
+        "label": "Reserva online",
+        "focus": [
+          "cliente",
+          "publica",
+          "postgres"
+        ],
+        "note": "El cliente anónimo consulta la página pública y reserva vía RPC."
+      },
+      {
+        "id": "panel",
+        "label": "Gestión del negocio",
+        "focus": [
+          "dueno",
+          "panel",
+          "auth",
+          "postgres",
+          "storage"
+        ],
+        "note": "Dueño y barberos autenticados gestionan agenda, ventas, QR y contenido."
+      },
+      {
+        "id": "pagos",
+        "label": "Pagos Mercado Pago",
+        "focus": [
+          "panel",
+          "checkout",
+          "mercado",
+          "webhook",
+          "postgres"
+        ],
+        "note": "Preferencia creada server-side; el webhook multi-negocio marca la venta como pagada."
+      },
+      {
+        "id": "recordatorios",
+        "label": "Recordatorios WhatsApp",
+        "focus": [
+          "postgres",
+          "cron",
+          "whatsapp"
+        ],
+        "note": "pg_cron + pg_net envían el template; el token nunca sale de la base de datos."
+      }
+    ]
+  },
+  "components": [
+    {
+      "id": "dueno",
+      "type": "external",
+      "label": "Dueño / Barbero",
+      "sublabel": "Panel de gestión",
+      "pos": [
+        35,
+        80
+      ],
+      "size": [
+        112,
+        90
+      ]
+    },
+    {
+      "id": "panel",
+      "type": "frontend",
+      "label": "Panel de gestión",
+      "sublabel": "React SPA · Vite",
+      "brand": "react",
+      "sources": [
+        {
+          "path": "src/App.jsx",
+          "label": "rutas y shell"
+        },
+        {
+          "path": "src/context/store.jsx",
+          "label": "estado global"
+        },
+        {
+          "path": "src/lib/supabase.js",
+          "label": "clientes Supabase"
+        }
+      ],
+      "pos": [
+        231,
+        80
+      ],
+      "size": [
+        140,
+        90
+      ]
+    },
+    {
+      "id": "auth",
+      "type": "security",
+      "label": "Supabase Auth",
+      "sublabel": "Email · JWT",
+      "brand": "supabase",
+      "sources": [
+        {
+          "path": "src/lib/auth.jsx",
+          "label": "AuthProvider"
+        }
+      ],
+      "pos": [
+        448,
+        80
+      ],
+      "size": [
+        126,
+        90
+      ]
+    },
+    {
+      "id": "cliente",
+      "type": "external",
+      "label": "Cliente final",
+      "sublabel": "Walk-in / reserva",
+      "pos": [
+        35,
+        380
+      ],
+      "size": [
+        112,
+        90
+      ]
+    },
+    {
+      "id": "publica",
+      "type": "frontend",
+      "label": "Página pública /c/:slug",
+      "sublabel": "Reserva online",
+      "brand": "react",
+      "sources": [
+        {
+          "path": "src/pages/PublicPage.jsx",
+          "label": "perfil del local"
+        },
+        {
+          "path": "src/pages/PublicReserva.jsx",
+          "label": "formulario + pago"
+        }
+      ],
+      "pos": [
+        259,
+        380
+      ],
+      "size": [
+        168,
+        90
+      ]
+    },
+    {
+      "id": "postgres",
+      "type": "database",
+      "label": "Supabase Postgres",
+      "sublabel": "Tablas · RLS · RPC",
+      "tag": "Multi-tenant por negocio_id",
+      "brand": "supabase",
+      "sources": [
+        {
+          "path": "supabase/migrations/20260808_01_tables.sql",
+          "label": "tablas"
+        },
+        {
+          "path": "supabase/migrations/20260808_02_rls.sql",
+          "label": "RLS + reservar_turno"
+        },
+        {
+          "path": "supabase/migrations/20260809_03_pagos.sql",
+          "label": "pagos · mp_credenciales"
+        }
+      ],
+      "pos": [
+        525,
+        380
+      ],
+      "size": [
+        147,
+        90
+      ]
+    },
+    {
+      "id": "storage",
+      "type": "cloud",
+      "label": "Supabase Storage",
+      "sublabel": "Bucket negocio-imagenes",
+      "brand": "supabase",
+      "sources": [
+        {
+          "path": "src/lib/upload.js",
+          "label": "subirImagen"
+        }
+      ],
+      "pos": [
+        28,
+        580
+      ],
+      "size": [
+        145,
+        90
+      ]
+    },
+    {
+      "id": "webhook",
+      "type": "backend",
+      "label": "Edge fn: mp-webhook",
+      "sublabel": "Deno · multi-negocio",
+      "brand": "supabase",
+      "sources": [
+        {
+          "path": "supabase/functions/mp-webhook/index.ts",
+          "label": "pagos confirmados"
+        }
+      ],
+      "pos": [
+        756,
+        440
+      ],
+      "size": [
+        145,
+        90
+      ]
+    },
+    {
+      "id": "checkout",
+      "type": "backend",
+      "label": "Edge fn: mp-checkout",
+      "sublabel": "Deno · service role",
+      "brand": "supabase",
+      "sources": [
+        {
+          "path": "supabase/functions/mp-checkout/index.ts",
+          "label": "preferencia MP"
+        }
+      ],
+      "pos": [
+        756,
+        140
+      ],
+      "size": [
+        145,
+        90
+      ]
+    },
+    {
+      "id": "mercado",
+      "type": "external",
+      "label": "Mercado Pago",
+      "sublabel": "Checkout API",
+      "pos": [
+        1064,
+        280
+      ],
+      "size": [
+        126,
+        90
+      ]
+    },
+    {
+      "id": "cron",
+      "type": "backend",
+      "label": "pg_cron + pg_net",
+      "sublabel": "Recordatorios WhatsApp",
+      "brand": "supabase",
+      "sources": [
+        {
+          "path": "supabase/migrations/20260811_02_recordatorios_cron.sql",
+          "label": "cron recordatorios"
+        }
+      ],
+      "pos": [
+        833,
+        600
+      ],
+      "size": [
+        126,
+        90
+      ]
+    },
+    {
+      "id": "whatsapp",
+      "type": "external",
+      "label": "WhatsApp Cloud API",
+      "sublabel": "Templates de mensaje",
+      "brand": "whatsapp",
+      "pos": [
+        1022,
+        600
+      ],
+      "size": [
+        145,
+        90
+      ]
+    }
+  ],
+  "boundaries": [
+    {
+      "kind": "region",
+      "label": "Frontend (Vercel)",
+      "wraps": [
+        "panel",
+        "publica"
+      ]
+    },
+    {
+      "kind": "region",
+      "label": "Supabase Cloud (backend + identidad)",
+      "wraps": [
+        "auth",
+        "postgres",
+        "checkout",
+        "webhook",
+        "cron"
+      ]
+    },
+    {
+      "kind": "security-group",
+      "label": "RLS por negocio_id",
+      "wraps": [
+        "postgres"
+      ]
+    }
+  ],
+  "connections": [
+    {
+      "id": "cliente-publica",
+      "from": "cliente",
+      "to": "publica",
+      "label": "abre la página del local (QR / link)",
+      "variant": "emphasis",
+      "fromSide": "right",
+      "toSide": "left",
+      "labelAt": [
+        203,
+        484
+      ]
+    },
+    {
+      "id": "publica-postgres",
+      "from": "publica",
+      "to": "postgres",
+      "label": "reservar_turno (RPC anónima)",
+      "variant": "emphasis",
+      "fromSide": "right",
+      "toSide": "left",
+      "labelAt": [
+        469,
+        505
+      ]
+    },
+    {
+      "id": "dueno-panel",
+      "from": "dueno",
+      "to": "panel",
+      "label": "accede al panel",
+      "fromSide": "right",
+      "toSide": "left",
+      "labelAt": [
+        182,
+        196
+      ]
+    },
+    {
+      "id": "panel-auth",
+      "from": "panel",
+      "to": "auth",
+      "label": "signIn / signUp",
+      "fromSide": "right",
+      "toSide": "left",
+      "labelAt": [
+        469,
+        184
+      ]
+    },
+    {
+      "id": "panel-postgres",
+      "from": "panel",
+      "to": "postgres",
+      "label": "CRUD por negocio_id",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "via": [
+        [
+          301,
+          245
+        ],
+        [
+          441,
+          245
+        ],
+        [
+          441,
+          330
+        ],
+        [
+          598.5,
+          330
+        ]
+      ],
+      "labelAt": [
+        520,
+        322
+      ]
+    },
+    {
+      "id": "panel-storage",
+      "from": "panel",
+      "to": "storage",
+      "label": "sube galería / logo",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "via": [
+        [
+          301,
+          250
+        ],
+        [
+          31.5,
+          250
+        ],
+        [
+          31.5,
+          520
+        ],
+        [
+          100.5,
+          520
+        ]
+      ],
+      "labelAt": [
+        126,
+        238
+      ]
+    },
+    {
+      "id": "panel-checkout",
+      "from": "panel",
+      "to": "checkout",
+      "label": "invoca mp-checkout",
+      "fromSide": "bottom",
+      "toSide": "left",
+      "via": [
+        [
+          301,
+          255
+        ],
+        [
+          744,
+          255
+        ],
+        [
+          744,
+          185
+        ]
+      ],
+      "labelAt": [
+        518,
+        270
+      ]
+    },
+    {
+      "id": "checkout-postgres",
+      "from": "checkout",
+      "to": "postgres",
+      "label": "lee credenciales MP",
+      "variant": "dashed",
+      "fromSide": "bottom",
+      "toSide": "right",
+      "via": [
+        [
+          828.5,
+          330
+        ],
+        [
+          700,
+          330
+        ],
+        [
+          700,
+          425
+        ]
+      ],
+      "labelAt": [
+        763,
+        288
+      ]
+    },
+    {
+      "id": "checkout-mercado",
+      "from": "checkout",
+      "to": "mercado",
+      "label": "crea preferencia de pago",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "via": [
+        [
+          828.5,
+          255
+        ],
+        [
+          1127,
+          255
+        ]
+      ],
+      "labelAt": [
+        973,
+        240
+      ]
+    },
+    {
+      "id": "mercado-webhook",
+      "from": "mercado",
+      "to": "webhook",
+      "label": "notificación de pago",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "via": [
+        [
+          1127,
+          395
+        ],
+        [
+          828.5,
+          395
+        ]
+      ],
+      "labelAt": [
+        1050,
+        382
+      ]
+    },
+    {
+      "id": "webhook-postgres",
+      "from": "webhook",
+      "to": "postgres",
+      "label": "marca venta/turno pagado",
+      "fromSide": "left",
+      "toSide": "right",
+      "via": [
+        [
+          707,
+          485
+        ],
+        [
+          707,
+          425
+        ],
+        [
+          689.5,
+          425
+        ]
+      ],
+      "labelAt": [
+        770,
+        360
+      ]
+    },
+    {
+      "id": "postgres-cron",
+      "from": "postgres",
+      "to": "cron",
+      "label": "lee turnos + credencial WA",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "via": [
+        [
+          598.5,
+          545
+        ],
+        [
+          896,
+          545
+        ]
+      ],
+      "labelAt": [
+        973,
+        318
+      ]
+    },
+    {
+      "id": "cron-whatsapp",
+      "from": "cron",
+      "to": "whatsapp",
+      "label": "envía template recordatorio (pg_net)",
+      "variant": "emphasis",
+      "fromSide": "right",
+      "toSide": "left",
+      "labelAt": [
+        973,
+        704
+      ]
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "Frontend",
+      "items": [
+        "SPA React 19 + Vite 8 + Tailwind v4 en Vercel",
+        "Panel: Dashboard, Agenda, Ventas, Clientes, QR, Ajustes y Personalización",
+        "Página pública /c/:slug con reserva online y pago opcional en el checkout hosteado de Mercado Pago"
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "Datos",
+      "items": [
+        "RLS multi-tenant vía negocio_de_usuario() sobre el security-group",
+        "RPC: reservar_turno (anónimo), horarios_ocupados, guardar credenciales MP/WA",
+        "pg_cron cada minuto + pg_net fire-and-forget para recordatorios",
+        "Supabase Storage (bucket negocio-imagenes) para logo y galería con UUIDs por negocio"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "Integraciones externas",
+      "items": [
+        "Mercado Pago: preferencia server-side + webhook que identifica al negocio; el cliente completa el pago en el checkout de MP",
+        "WhatsApp Cloud API: template enviado al móvil del cliente; token guardado solo en la base de datos",
+        "Supabase Auth con sesiones en localStorage"
+      ]
+    }
+  ]
+}
