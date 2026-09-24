@@ -25,6 +25,7 @@ export default function Ajustes() {
 
   const [servicioForm, setServicioForm] = useState({ nombre: "", duracion: 30, precio: "" })
   const [editId, setEditId] = useState(null)
+  const nombreServicioRef = useRef(null)
 
   const [pagos, setPagos] = useState({
     pagoEfectivo: preferencias?.pagoEfectivo !== false,
