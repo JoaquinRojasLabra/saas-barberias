@@ -28,21 +28,26 @@ export default function Agenda() {
     cta: "Nuevo turno",
     onCta: () => setShowModal(true),
   })
-  if (estado) return estado
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h1 className="text-xl font-extrabold tracking-tight">Agenda de hoy</h1>
-        <button onClick={() => setShowModal(true)} className="flex items-center gap-2 bg-[var(--accent)] text-white text-sm font-semibold px-4 py-2 rounded-xl">
-          <Plus size={18} weight="bold" /> Nuevo turno
-        </button>
-      </div>
-      <div className="space-y-2">
-        {ordenados.map((t) => (
-          <TurnoChip key={t.id} turno={t} cliente={getCliente(t.clienteId)} servicio={getServicio(t.servicioId)} onEstado={setTurnoEstado} />
-        ))}
-      </div>
+      {estado ? (
+        estado
+      ) : (
+        <>
+          <div className="flex items-center justify-between">
+            <h1 className="text-xl font-extrabold tracking-tight">Agenda de hoy</h1>
+            <button onClick={() => setShowModal(true)} className="flex items-center gap-2 bg-[var(--accent)] text-white text-sm font-semibold px-4 py-2 rounded-xl">
+              <Plus size={18} weight="bold" /> Nuevo turno
+            </button>
+          </div>
+          <div className="space-y-2">
+            {ordenados.map((t) => (
+              <TurnoChip key={t.id} turno={t} cliente={getCliente(t.clienteId)} servicio={getServicio(t.servicioId)} onEstado={setTurnoEstado} />
+            ))}
+          </div>
+        </>
+      )}
       {showModal && <TurnoModal onClose={() => setShowModal(false)} empleadoPorDefecto={esBarbero ? session.barberoId : undefined} />}
     </div>
   )
